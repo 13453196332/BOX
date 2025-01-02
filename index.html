@@ -4,256 +4,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>编码解析器</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-
-        button {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            background: #333;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #555;
-        }
-
-        #result {
-            margin-top: 20px;
-            white-space: pre-wrap;
-            background: #eee;
-            padding: 10px;
-            border-radius: 5px;
-        }
-
-        .error {
-            color: red;
-        }
-    </style>
-    <script src="https://unpkg.com/@zxing/library@latest"></script>
+    <title>我的个人博客</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 
-<body>
-    <div class="container">
-        <h1>编码解析器</h1>
-        <input type="text" id="codeInput" placeholder="请输入MA编码、AHM编码或GS1编码">
-        <button onclick="parseCode()">解析</button>
-        <div id="result"></div>
-        <div id="error" class="error"></div>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow">
+        <div class="container mx-auto px-4 py-2">
+            <ul class="flex space-x-4">
+                <li><a href="index.html" class="text-gray-800 hover:text-blue-500">首页</a></li>
+                <li><a href="about.html" class="text-gray-800 hover:text-blue-500">关于我</a></li>
+                <li><a href="contact.html" class="text-gray-800 hover:text-blue-500">联系我</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800">我的个人博客</h1>
+        </header>
+        <main>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <article class="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:scale-105">
+                    <div class="p-6">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-2">我也不知道写什么</h2>
+                        <p class="text-gray-600 mb-4">祝大家新年快乐</p>
+                        <div class="text-sm text-gray-500" id="date1"></div>
+                    </div>
+                </article>
+                <article class="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:scale-105">
+                    <div class="p-6">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-2">我也不知道写什么</h2>
+                        <p class="text-gray-600 mb-4">祝大家新年快乐</p>
+                        <div class="text-sm text-gray-500" id="date2"></div>
+                    </div>
+                </article>
+                <article class="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:scale-105">
+                    <div class="p-6">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-2">我也不知道写什么</h2>
+                        <p class="text-gray-600 mb-4">祝大家新年快乐</p>
+                        <div class="text-sm text-gray-500" id="date3"></div>
+                    </div>
+                </article>
+            </div>
+        </main>
     </div>
-
-    <script>
-        function parseMACode(code) {
-            code = code.replace(/\s/g, '');
-            const result = {
-                国家代码: '',
-                行业代码: '',
-                注册人代码: '',
-                产品编码: '',
-                校验码: '',
-                产品标识: '',
-                生产批号: '',
-                生产日期: '',
-                失效日期: '',
-                序列号: '',
-                灭菌批号: '',
-                有效期: '',
-                医保码: ''
-            };
-
-            const diParts = code.split('.');
-            if (diParts[0] === 'MA' && diParts.length >= 4) {
-                result.国家代码 = diParts[1];
-                result.行业代码 = diParts[2];
-                result.注册人代码 = diParts[3];
-                result.产品编码 = diParts[4] || '';
-                result.校验码 = diParts[5] || '';
-                result.产品标识 = diParts.slice(0, 4).join('.');
-            } else {
-                return { error: '无效的MA编码格式（DI部分）' };
-            }
-
-            const piPart = code.split('.').slice(4).join('.');
-            if (piPart) {
-                piPart.split('.').forEach(part => {
-                    const identifier = part.charAt(0);
-                    const value = part.slice(1);
-
-                    switch (identifier) {
-                        case 'L':
-                            result.生产批号 = value;
-                            break;
-                        case 'M':
-                            result.生产日期 = formatDate(value);
-                            break;
-                        case 'E':
-                            result.失效日期 = formatDate(value);
-                            break;
-                        case 'S':
-                            result.序列号 = value;
-                            break;
-                        case 'D':
-                            result.灭菌批号 = value;
-                            break;
-                        case 'V':
-                            result.有效期 = formatDate(value);
-                            break;
-                        case 'Y':
-                            result.医保码 = value;
-                            break;
-                    }
-                });
-            }
-
-            return result;
-        }
-
-        function parseAHMCode(code) {
-            code = code.replace(/\s/g, '');
-            const result = {
-                放心码: '',
-                生产批号: '',
-                生产日期: '',
-                有效日期: '',
-                序列号: ''
-            };
-
-            if (code.startsWith('MF') && code.length >= 16) {
-                result.放心码 = code.slice(2, 15);
-            } else {
-                return { error: '无效的AHM编码格式（DI部分）' };
-            }
-
-            const piPart = code.slice(15);
-            const piRegex = /BA(\w{4,10})\*SN(\w{5,15})\*MD(\d{6})ED(\d{6})CC(\d+)/;
-            const piMatch = piPart.match(piRegex);
-            console.log(piMatch, "piMatch");
-            
-            if (piMatch) {
-                result.生产批号 = piMatch[1];
-                result.序列号 = piMatch[2];
-                result.生产日期 = formatDate(piMatch[3]);
-                result.有效日期 = formatDate(piMatch[4]);
-            } else {
-                return { error: '无效的AHM编码格式（PI部分）' };
-            }
-
-            return result;
-        }
-
-        async function parseGS1Code(code) {
-            const result = {};
-            const aiRegex = /\((\d{2})\)(\w+)/g;
-            let match;
-
-            while ((match = aiRegex.exec(code)) !== null) {
-                const [, ai, value] = match;
-                switch (ai) {
-                    case '01':
-                        result.GTIN = value;
-                        break;
-                    case '10':
-                        result.批号 = value;
-                        break;
-                    case '11':
-                        result.生产日期 = formatDate(value);
-                        break;
-                    case '17':
-                        result.有效期 = formatDate(value);
-                        break;
-                    case '21':
-                        result.序列号 = value;
-                        break;
-                    default:
-                        result[`AI(${ai})`] = value;
-                }
-            }
-
-            if (Object.keys(result).length === 0) {
-                return { error: '无效的GS1编码格式' };
-            }
-
-            return result;
-        }
-
-        function formatDate(dateString) {
-            if (dateString.length === 6) {
-                const year = '20' + dateString.slice(0, 2);
-                const month = dateString.slice(2, 4);
-                const day = dateString.slice(4, 6);
-                return `${year}年${month}月${day}日`;
-            }
-            return dateString;
-        }
-
-        function formatDateEight(dateString) {
-            if (dateString.length === 8) {
-                const year = dateString.slice(0, 4);
-                const month = dateString.slice(4, 6);
-                const day = dateString.slice(6, 8);
-                return `${year}年${month}月${day}日`;
-            }
-            return dateString;
-        }
-
-        async function parseCode() {
-            const codeInput = document.getElementById('codeInput').value;
-            const resultDiv = document.getElementById('result');
-            const errorDiv = document.getElementById('error');
-            resultDiv.textContent = '';
-            errorDiv.textContent = '';
-
-            if (!codeInput) {
-                errorDiv.textContent = '请输入编码';
-                return;
-            }
-
-            let parsedResult;
-            if (codeInput.startsWith('MA')) {
-                parsedResult = parseMACode(codeInput);
-            } else if (codeInput.startsWith('MF')) {
-                parsedResult = parseAHMCode(codeInput);
-            } else {
-                parsedResult = await parseGS1Code(codeInput);
-            }
-
-            if (parsedResult.error) {
-                errorDiv.textContent = parsedResult.error;
-            } else {
-                resultDiv.textContent = JSON.stringify(parsedResult, null, 2);
-            }
-        }
-    </script>
 </body>
+<script>
+    // 获取当前日期并格式化为 YYYY-MM-DD
+    const today = new Date();
+    const formattedDate = today.toISOString().split('T')[0];
+
+    // 更新每个日期部分
+    document.getElementById('date1').textContent = formattedDate;
+    document.getElementById('date2').textContent = formattedDate;
+    document.getElementById('date3').textContent = formattedDate;
+</script>
 
 </html>
