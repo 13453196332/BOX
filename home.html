@@ -4,28 +4,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>纸盒人的博客</title>
+    <title>留言</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+            width: 400px;
+            text-align: center;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .modal-buttons {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+    </style>
 </head>
 
-<body class="bg-gray-100">
-    <nav class="bg-white shadow">
+<body class="bg-red-100">
+    <nav class="bg-red-500 shadow">
         <div class="container mx-auto px-4 py-2">
             <ul class="flex space-x-4">
-                <li><a href="index.html" class="text-gray-800 hover:text-blue-500">首页</a></li>
-                <li><a href="about.html" class="text-gray-800 hover:text-blue-500">关于我</a></li>
-                <li><a href="contact.html" class="text-gray-800 hover:text-blue-500">联系我</a></li>
+                <li><a href="index.html" class="text-white hover:text-yellow-400">首页</a></li>
+                <li><a href="about.html" class="text-white hover:text-yellow-400">关于我</a></li>
+                <li><a href="contact.html" class="text-white hover:text-yellow-400">联系我</a></li>
+                <li><a href="home.html" class="text-white hover:text-yellow-400">留言</a></li>
             </ul>
         </div>
     </nav>
+
     <div class="container mx-auto px-4 py-8">
         <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-800">欢迎来到我的博客</h1>
+            <h1 class="text-4xl font-bold text-red-800">留言板</h1>
         </header>
-        <main>
-            <p class="text-gray-600 mb-4">这是我的个人博客，分享我的想法和经历。</p>
-        </main>
+
+        <!-- 留言表单 -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <div class="mb-4">
+                <label for="messageContent" class="block text-red-800 mb-2">留言内容：</label>
+                <textarea id="messageContent" rows="4"
+                    class="w-full p-2 border border-red-300 rounded-lg focus:outline-none focus:border-red-500"
+                    required></textarea>
+            </div>
+            <button id="submitBtn"
+                class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">
+                提交留言
+            </button>
+        </div>
+
+        <!-- 留言列表 -->
+        <div id="messageList" class="grid grid-cols-1 gap-4">
+            <!-- 留言内容将在这里动态显示 -->
+        </div>
     </div>
+
+    <!-- 自定义模态框 -->
+    <div id="customModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <p id="modalMessage" class="text-lg text-gray-700 mb-4"></p>
+            <div class="modal-buttons">
+                <button id="modalConfirm"
+                    class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">确定</button>
+                <button id="modalCancel"
+                    class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 函数 -->
+    <script>
+        function showCustomModal(message, isConfirm = false) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customModal');
+                const modalMessage = document.getElementById('modalMessage');
+                const confirmBtn = document.getElementById('modalConfirm');
+                const cancelBtn = document.getElementById('modalCancel');
+
+                modalMessage.textContent = message;
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('active'), 10);
+
+                if (!isConfirm) {
+                    cancelBtn.style.display = 'none';
+                    confirmBtn.focus();
+                } else {
+                    cancelBtn.style.display = 'block';
+                }
+
+                function closeModal(result) {
+                    modal.classList.remove('active');
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                        resolve(result);
+                    }, 200);
+                }
+
+                confirmBtn.onclick = () => closeModal(true);
+                cancelBtn.onclick = () => closeModal(false);
+            });
+        }
+    </script>
+
+    <!-- Firebase -->
+    <script type="module">
+        // 导入 Firebase 所需功能
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, query, orderBy, onSnapshot, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        // Firebase 配置
+        const firebaseConfig = {
+            apiKey: "AIzaSyDse5EpKqek0_2pO-C2Bcin34LAXAxpzIY",
+            authDomain: "boxman-c7e12.firebaseapp.com",
+            projectId: "boxman-c7e12",
+            storageBucket: "boxman-c7e12.firebasestorage.app",
+            messagingSenderId: "468115088667",
+            appId: "1:468115088667:web:6df7c3c0b8e7511f4d9fbe",
+            measurementId: "G-ZHH4CCQ61S"
+        };
+
+        // 初始化 Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // 启用持久化
+        enableIndexedDbPersistence(db)
+            .catch((err) => {
+                if (err.code == 'failed-precondition') {
+                    console.log('Persistence failed');
+                } else if (err.code == 'unimplemented') {
+                    console.log('Persistence is not available');
+                } else {
+                    console.error('Firebase Error: ', err);
+                }
+            });
+
+        // 添加事件监听器
+        document.addEventListener('DOMContentLoaded', () => {
+            // 提交按钮事件监听
+            document.getElementById('submitBtn').addEventListener('click', async () => {
+                const content = document.getElementById('messageContent').value;
+                if (!content.trim()) {
+                    await showCustomModal('请输入留言内容！');
+                    return;
+                }
+
+                try {
+                    await addDoc(collection(db, "messages"), {
+                        content: content,
+                        date: new Date().toLocaleString(),
+                        timestamp: new Date()
+                    });
+
+                    document.getElementById('messageContent').value = '';
+                    await showCustomModal('留言发布成功！');
+                } catch (error) {
+                    console.error("Error adding message: ", error);
+                    await showCustomModal('发布失败，请稍后重试！');
+                }
+            });
+
+            // 删除按钮事件处理
+            document.addEventListener('click', async (e) => {
+                if (e.target.matches('[data-delete-id]')) {
+                    const messageId = e.target.getAttribute('data-delete-id');
+                    const shouldDelete = await showCustomModal('确定要删除这条留言吗？', true);
+                    if (shouldDelete) {
+                        try {
+                            await deleteDoc(doc(db, "messages", messageId));
+                            const messageItem = e.target.closest('.bg-white');
+                            messageItem.classList.add('scale-95', 'opacity-0');
+                            setTimeout(() => {
+                                messageItem.remove();
+                            }, 200);
+                        } catch (error) {
+                            console.error("Error removing message: ", error);
+                            await showCustomModal('删除失败，请稍后重试！');
+                        }
+                    }
+                }
+            });
+
+            // 加载消息
+            const messageList = document.getElementById('messageList');
+            const q = query(collection(db, "messages"), orderBy("timestamp", "desc"));
+
+            onSnapshot(q, (snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === "added") {
+                        const data = change.doc.data();
+                        const messageItem = document.createElement('div');
+                        messageItem.className = 'bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:scale-105 relative';
+                        messageItem.innerHTML = `
+                            <div class="p-6">
+                                <div class="text-red-700 mb-4">${data.content}</div>
+                                <div class="text-sm text-gray-500">${data.date}</div>
+                                <button data-delete-id="${change.doc.id}" 
+                                    class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors">
+                                    ×
+                                </button>
+                            </div>
+                        `;
+                        messageList.insertBefore(messageItem, messageList.firstChild);
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>
