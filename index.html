@@ -16,14 +16,19 @@
                 <li><a href="index.html" class="text-white hover:text-yellow-400">首页</a></li>
                 <li><a href="about.html" class="text-white hover:text-yellow-400">关于我</a></li>
                 <li><a href="contact.html" class="text-white hover:text-yellow-400">联系我</a></li>
-                <li><a href="home.html" class="text-white hover:text-yellow-400">留言</a></li>
+                <li><a href="home.html" class="text-white hover:text-yellow-400">对话</a></li>
             </ul>
         </div>
     </nav>
     <div class="container mx-auto px-4 py-8">
         <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-red-800">纸盒人的博客</h1>
+            <h1 class="text-4xl font-bold text-red-800">纸盒人的网站</h1>
         </header>
+        <!-- 时间显示器 -->
+        <div class="text-center mb-8">
+            <h2 class="text-2xl font-semibold text-red-800">当前时间：<span id="time" class="text-red-700 font-mono"></span>
+            </h2>
+        </div>
         <main>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <article
@@ -53,16 +58,24 @@
             </div>
         </main>
     </div>
-</body>
-<script>
-    // 获取当前日期并格式化为 YYYY-MM-DD
-    const today = new Date();
-    const formattedDate = today.toISOString().split('T')[0];
 
-    // 更新每个日期部分
-    document.getElementById('date1').textContent = formattedDate;
-    document.getElementById('date2').textContent = formattedDate;
-    document.getElementById('date3').textContent = formattedDate;
-</script>
+    <script>
+        const today = new Date();
+        const formattedDate = today.toISOString().split('T')[0];
+        document.getElementById('date1').textContent = formattedDate;
+        document.getElementById('date2').textContent = formattedDate;
+        document.getElementById('date3').textContent = formattedDate;
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const timeString = `${hours}:${minutes}:${seconds}`;
+            document.getElementById('time').textContent = timeString;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+    </script>
+</body>
 
 </html>
