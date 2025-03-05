@@ -7,6 +7,68 @@
     <title>王豪杰的简历</title>
     <link rel="icon" href="./博客.png" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* 保持原有导航栏样式 */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        body {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+        html,
+        body {
+            overflow: auto;
+            height: 100%;
+        }
+
+        /* 添加动画样式 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        main section {
+            animation: fadeInUp 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        main section:nth-child(1) {
+            animation-delay: 0.2s;
+        }
+
+        main section:nth-child(2) {
+            animation-delay: 0.4s;
+        }
+
+        main section:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        main section:nth-child(4) {
+            animation-delay: 0.8s;
+        }
+
+        main section:nth-child(5) {
+            animation-delay: 1s;
+        }
+    </style>
 </head>
 
 <body class="bg-red-100">
@@ -20,9 +82,9 @@
             </ul>
         </div>
     </nav>
-    <div class="container mx-auto px-4 py-8">
+    <div class="container mx-auto px-4 py-8 mt-10">
         <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-red-800">王豪杰的简历</h1>
+            <h1 class="text-4xl font-bold text-red-800">我的简历</h1>
         </header>
         <main class="bg-white rounded-lg shadow-lg p-6">
             <section class="mb-6">
@@ -61,7 +123,7 @@
                 </div>
                 <div>
                     <h3 class="text-xl font-semibold">云流科技有限公司 - 前端开发工程师</h3>
-                    <p class="text-sm text-gray-600">2023.05 - 2025</p>
+                    <p class="text-sm text-gray-600">2023.05 - 至今</p>
                     <ul class="list-disc list-inside mt-2">
                         <li>参与公司多个平台应用，包括PC端、移动端、微信小程序等产品开发，具有较强的性能优化意识</li>
                         <li>参与项目研讨会，进行需求分析，技术选型等工作</li>

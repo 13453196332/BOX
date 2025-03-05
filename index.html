@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>首页 - 纸盒人的网站</title>
     <link rel="icon" href="./博客.png" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="./css/animations.css" rel="stylesheet">
 </head>
-
 <body class="bg-red-100">
-    <nav class="bg-red-500 shadow">
+    <!--#include virtual="./components/navbar.html"-->
+    <nav class="bg-red-500 shadow animate-fade-in">
         <div class="container mx-auto px-4 py-2">
             <ul class="flex space-x-4">
                 <li><a href="index.html" class="text-white hover:text-yellow-400">首页</a></li>
@@ -21,34 +21,31 @@
         </div>
     </nav>
     <div class="container mx-auto px-4 py-8">
-        <header class="text-center mb-8">
+        <header class="text-center mb-8 animate-slide-in-top">
             <h1 class="text-4xl font-bold text-red-800">纸盒人的网站</h1>
         </header>
         <!-- 时间显示器 -->
-        <div class="text-center mb-8">
+        <div class="text-center mb-8 animate-slide-in-bottom">
             <h2 class="text-2xl font-semibold text-red-800">当前时间：<span id="time" class="text-red-700 font-mono"></span>
             </h2>
         </div>
         <main>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <article
-                    class="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:scale-105">
+                <article class="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:scale-105 animate-fade-in-up">
                     <div class="p-6">
-                        <h2 class="text-xl font-semibold text-red-800 mb-2">我也不知道写什么</h2>
-                        <p class="text-red-700 mb-4">祝大家新年快乐</p>
+                        <h2 class="text-xl font-semibold text-red-800 mb-2">瞎写的编码解析</h2>
+                        <a href="parse.html" class="text-red-700 mb-4 hover:text-red-900">跳转</a>
                         <div class="text-sm text-gray-500" id="date1"></div>
                     </div>
                 </article>
-                <article
-                    class="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:scale-105">
+                <article class="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:scale-105 animate-fade-in-up delay-100">
                     <div class="p-6">
                         <h2 class="text-xl font-semibold text-red-800 mb-2">我也不知道写什么</h2>
                         <p class="text-red-700 mb-4">祝大家新年快乐</p>
                         <div class="text-sm text-gray-500" id="date2"></div>
                     </div>
                 </article>
-                <article
-                    class="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:scale-105">
+                <article class="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:scale-105 animate-fade-in-up delay-200">
                     <div class="p-6">
                         <h2 class="text-xl font-semibold text-red-800 mb-2">我也不知道写什么</h2>
                         <p class="text-red-700 mb-4">祝大家新年快乐</p>
@@ -58,7 +55,42 @@
             </div>
         </main>
     </div>
-
+    <style>
+        @keyframes fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slide-in-top {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes slide-in-bottom {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes fade-in-up {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.5s ease-out;
+        }
+        .animate-slide-in-top {
+            animation: slide-in-top 0.6s ease-out;
+        }
+        .animate-slide-in-bottom {
+            animation: slide-in-bottom 0.6s ease-out;
+        }
+        .animate-fade-in-up {
+            animation: fade-in-up 0.6s ease-out;
+        }
+        .delay-100 {
+            animation-delay: 0.1s;
+        }
+        .delay-200 {
+            animation-delay: 0.2s;
+        }
+    </style>
     <script>
         const today = new Date();
         const formattedDate = today.toISOString().split('T')[0];
@@ -77,5 +109,4 @@
         updateTime();
     </script>
 </body>
-
 </html>

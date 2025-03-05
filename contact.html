@@ -9,18 +9,55 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/3.2.1/dexie.min.js"></script>
     <style>
+        /* 保持原有样式 */
         body {
             scrollbar-width: none;
             -ms-overflow-style: none;
         }
-
         body::-webkit-scrollbar {
             display: none;
         }
-
         html, body {
             overflow: auto;
             height: 100%;
+        }
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        /* 添加动画样式 */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .container {
+            animation: fadeIn 0.8s ease-out;
+        }
+        .flex.justify-center.space-x-4 {
+            animation: slideIn 0.6s ease-out 0.3s both;
+        }
+        .bg-white.rounded-lg.p-6.shadow-md {
+            animation: slideIn 0.6s ease-out 0.6s both;
+        }
+        button {
+            transition: all 0.2s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .bg-gray-50.p-4.rounded-lg {
+            transition: all 0.3s ease;
+        }
+        .bg-gray-50.p-4.rounded-lg:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
     </style>
 </head>
@@ -36,250 +73,109 @@
             </ul>
         </div>
     </nav>
-    <div class="container mx-auto px-4 py-8">
-        <div class="bg-white rounded-lg p-6 shadow-md">
-            <h1 class="text-2xl font-bold text-center text-red-800 mb-6">编码解析器</h1>
-            <div class="relative mb-4">
-                <input type="text" id="codeInput" placeholder="请输入MA编码、AHM编码或GS1编码" class="w-full p-3 border rounded">
-                <button onclick="clearInput()" class="absolute right-4 top-3 text-red-500"
-                    style="background: none; border: none;">✖</button>
+    <div class="container mx-auto px-4 py-8 mt-10">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-red-800 mb-4">联系我</h1>
+            <p class="text-lg text-red-700">欢迎通过以下方式与我取得联系</p>
+        </div>
+        <div class="flex justify-center space-x-4 mb-6">
+            <button onclick="showSteamDialog()" class="p-3 bg-gray-800 text-white rounded hover:bg-gray-700">
+                <i class="fab fa-steam"></i> Steam
+            </button>
+            <button onclick="showEmailDialog()" class="p-3 bg-red-600 text-white rounded hover:bg-red-500">
+                <i class="fas fa-envelope"></i> 邮箱
+            </button>
+        </div>
+        <div class="bg-white rounded-lg p-6 shadow-md mt-8">
+            <h2 class="text-2xl font-bold text-red-800 mb-4">其他联系方式</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="text-xl font-semibold text-red-700 mb-2">Call Me</h3>
+                    <p class="text-gray-600">我干死他</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="text-xl font-semibold text-red-700 mb-2">我是个彩笔</h3>
+                    <p class="text-gray-600">求指教</p>
+                </div>
             </div>
-            <button onclick="parseCode()" class="w-full p-3 bg-red-800 text-white rounded hover:bg-red-700">解析</button>
-            <h2 class="text-xl font-bold text-red-800 mb-4">历史记录</h2>
-            <ul id="historyList" class="list-disc pl-5 mb-4">
-                <!-- 历史记录项将动态添加到这里 -->
-                <li class="flex justify-between items-center bg-gray-100 p-2 rounded mb-2">
-                    <span>示例历史记录</span>
-                    <button class="text-red-500 hover:text-red-700">删除</button>
-                </li>
-            </ul>
-            <div id="result" class="mt-4 p-3 bg-red-100 rounded"></div>
-            <div id="error" class="mt-4 text-red-500"></div>
         </div>
     </div>
     <script>
-        const db = new Dexie('CodeHistoryDB');
-        db.version(1).stores({
-            codes: '++id, code'
-        });
-
-        async function saveCode(code) {
-            await db.codes.add({ code });
-            loadHistory();
+        function showSteamDialog() {
+            const steamUrl = "https://steamcommunity.com/profiles/76561198965005221/";
+            const dialogContent = `
+            <div class="p-4">
+                <h3 class="text-lg font-bold mb-2">我的Steam主页</h3>
+                <p class="mb-4">点击下方按钮访问我的Steam主页：</p>
+                <a href="${steamUrl}" target="_blank" 
+                   class="w-full p-3 bg-gray-800 text-white rounded hover:bg-gray-700 text-center">
+                    <i class="fab fa-steam"></i> 访问Steam主页
+                </a>
+            </div>`;
+            showDialog(dialogContent);
         }
-
-        async function loadHistory() {
-            const historyList = document.getElementById('historyList');
-            historyList.innerHTML = '';
-            const codes = await db.codes.toArray();
-            codes.forEach(item => {
-                const li = document.createElement('li');
-                li.className = 'flex justify-between items-center bg-gray-100 p-2 rounded mb-2';
-                li.textContent = item.code;
-                const deleteButton = document.createElement('button');
-                deleteButton.textContent = '删除';
-                deleteButton.className = 'text-red-500 hover:text-red-700';
-                deleteButton.onclick = () => deleteCode(item.id);
-                li.appendChild(deleteButton);
-                historyList.appendChild(li);
+        function showEmailDialog() {
+            const email = "whj1008611@gmail.com";
+            const dialogContent = `
+            <div class="p-4">
+                <h3 class="text-lg font-bold mb-2">我的邮箱</h3>
+                <p class="mb-4">我的联系邮箱是：</p>
+                <div class="bg-gray-100 p-3 rounded mb-4">
+                    <span class="font-mono">${email}</span>
+                </div>
+                <button onclick="copyEmail('${email}')" 
+                        class="w-full p-3 bg-red-600 text-white rounded hover:bg-red-500">
+                    复制邮箱地址
+                </button>
+            </div>`;
+            showDialog(dialogContent);
+        }
+        function showDialog(content) {
+            const dialog = document.createElement('div');
+            dialog.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4';
+            dialog.innerHTML = `
+            <div class="bg-white rounded-lg w-full max-w-md">
+                ${content}
+                <div class="p-4 border-t">
+                    <button onclick="this.parentElement.parentElement.parentElement.remove()" 
+                            class="w-full p-2 bg-gray-200 rounded hover:bg-gray-300">
+                        关闭
+                    </button>
+                </div>
+            </div>`;
+            document.body.appendChild(dialog);
+        }
+        function copyEmail(email) {
+            navigator.clipboard.writeText(email).then(() => {
+                showToast('邮箱地址已复制到剪贴板');
             });
         }
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 p-4 bg-green-500 text-white rounded-lg shadow-lg transform transition-all duration-300 ease-out opacity-0 translate-y-4';
+            toast.textContent = message;
+            document.body.appendChild(toast);
 
-        async function deleteCode(id) {
-            await db.codes.delete(id);
-            loadHistory();
+            // 显示动画
+            setTimeout(() => {
+                toast.classList.remove('opacity-0', 'translate-y-4');
+                toast.classList.add('opacity-100', 'translate-y-0');
+            }, 10);
+
+            // 隐藏动画
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-4');
+            }, 3000);
+
+            // 移除元素
+            setTimeout(() => {
+                toast.remove();
+            }, 3300);
         }
-
-        function clearInput() {
-            document.getElementById('codeInput').value = '';
-        }
-
-        function parseMACode(code) {
-            code = code.replace(/\s/g, '');
-            const result = {
-                国家代码: '',
-                行业代码: '',
-                注册人代码: '',
-                产品编码: '',
-                校验码: '',
-                产品标识: '',
-                生产批号: '',
-                生产日期: '',
-                失效日期: '',
-                序列号: '',
-                灭菌批号: '',
-                有效期: '',
-                医保码: ''
-            };
-
-            const diParts = code.split('.');
-            if (diParts[0] === 'MA' && diParts.length >= 4) {
-                result.国家代码 = diParts[1];
-                result.行业代码 = diParts[2];
-                result.注册人代码 = diParts[3];
-                result.产品编码 = diParts[4] || '';
-                result.校验码 = diParts[5] || '';
-                result.产品标识 = diParts.slice(0, 4).join('.');
-            } else {
-                return { error: '无效的MA编码格式（DI部分）' };
-            }
-
-            const piPart = code.split('.').slice(4).join('.');
-            if (piPart) {
-                piPart.split('.').forEach(part => {
-                    const identifier = part.charAt(0);
-                    const value = part.slice(1);
-
-                    switch (identifier) {
-                        case 'L':
-                            result.生产批号 = value;
-                            break;
-                        case 'M':
-                            result.生产日期 = formatDate(value);
-                            break;
-                        case 'E':
-                            result.失效日期 = formatDate(value);
-                            break;
-                        case 'S':
-                            result.序列号 = value;
-                            break;
-                        case 'D':
-                            result.灭菌批号 = value;
-                            break;
-                        case 'V':
-                            result.有效期 = formatDate(value);
-                            break;
-                        case 'Y':
-                            result.医保码 = value;
-                            break;
-                    }
-                });
-            }
-
-            return result;
-        }
-
-        function parseAHMCode(code) {
-            code = code.replace(/\s/g, '');
-            const result = {
-                放心码: '',
-                生产批号: '',
-                生产日期: '',
-                有效日期: '',
-                序列号: ''
-            };
-
-            if (code.startsWith('MF') && code.length >= 16) {
-                result.放心码 = code.slice(2, 15);
-            } else {
-                return { error: '无效的AHM编码格式（DI部分）' };
-            }
-
-            const piPart = code.slice(15);
-            const piRegex = /BA(\w{4,10})\*SN(\w{5,15})\*MD(\d{6})ED(\d{6})CC(\d+)/;
-            const piMatch = piPart.match(piRegex);
-            console.log(piMatch, "piMatch");
-
-            if (piMatch) {
-                result.生产批号 = piMatch[1];
-                result.序列号 = piMatch[2];
-                result.生产日期 = formatDate(piMatch[3]);
-                result.有效日期 = formatDate(piMatch[4]);
-            } else {
-                return { error: '无效的AHM编码格式（PI部分）' };
-            }
-
-            return result;
-        }
-
-        async function parseGS1Code(code) {
-            const result = {};
-
-            // 如果编码没有括号，将其转换为有括号的格式
-            if (!code.includes('(')) {
-                const pattern = /(\d{2})(\d{6}|\d+)/g;
-                code = code.replace(pattern, '($1)$2');
-            }
-            const aiRegex = /\((\d{2})\)(\w+)/g;
-            let match;
-            while ((match = aiRegex.exec(code)) !== null) {
-                const [, ai, value] = match;
-                switch (ai) {
-                    case '01':
-                        result.GTIN = value;
-                        break;
-                    case '10':
-                        result.批号 = value;
-                        break;
-                    case '11':
-                        result.生产日期 = formatDate(value);
-                        break;
-                    case '17':
-                        result.有效期 = formatDate(value);
-                        break;
-                    case '21':
-                        result.序列号 = value;
-                        break;
-                    default:
-                        result[`AI(${ai})`] = value;
-                }
-            }
-
-            if (Object.keys(result).length === 0) {
-                return { error: '无效的GS1编码格式' };
-            }
-
-            return result;
-        }
-
-        function formatDate(dateString) {
-            if (dateString.length === 6) {
-                const year = '20' + dateString.slice(0, 2);
-                const month = dateString.slice(2, 4);
-                const day = dateString.slice(4, 6);
-                return `${year}年${month}月${day}日`;
-            } else if (dateString.length === 8) {
-                const year = dateString.slice(0, 4);
-                const month = dateString.slice(4, 6);
-                const day = dateString.slice(6, 8);
-                return `${year}年${month}月${day}日`;
-            }
-            return dateString;
-        }
-
-        async function parseCode() {
-            const codeInput = document.getElementById('codeInput').value;
-            const resultDiv = document.getElementById('result');
-            const errorDiv = document.getElementById('error');
-            resultDiv.textContent = '';
-            errorDiv.textContent = '';
-
-            if (!codeInput) {
-                errorDiv.textContent = '请输入编码';
-                return;
-            }
-
-            await saveCode(codeInput); // 保存编码到历史记录
-
-            let parsedResult;
-            if (codeInput.startsWith('MA')) {
-                parsedResult = parseMACode(codeInput);
-            } else if (codeInput.startsWith('MF')) {
-                parsedResult = parseAHMCode(codeInput);
-            } else {
-                parsedResult = await parseGS1Code(codeInput);
-            }
-
-            if (parsedResult.error) {
-                errorDiv.textContent = parsedResult.error;
-            } else {
-                resultDiv.textContent = JSON.stringify(parsedResult, null, 2);
-            }
-            document.getElementById('codeInput').value = '';
-        }
-
-        // 页面加载时加载历史记录
-        window.onload = loadHistory;
+        // 在head中添加Font Awesome
+        document.head.insertAdjacentHTML('beforeend',
+            '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">');
     </script>
 </body>
 
