@@ -60,14 +60,22 @@ function sendMessage() {
     }
 }
 function displayLoadingMessage() {
-    const loadingMessage = "加载中...";
+    const loadingMessages = ["加载中", "加载中.", "加载中..", "加载中..."];
+    let currentIndex = 0;
+
     const messageItem = document.createElement('div');
     messageItem.classList.add('message-item', 'received', 'loading');
     messageItem.setAttribute('id', 'loadingMessage');
 
     const messageBubble = document.createElement('div');
     messageBubble.classList.add('message-bubble');
-    messageBubble.textContent = loadingMessage;
+    messageBubble.textContent = loadingMessages[currentIndex];
+
+    // 将定时器ID存储在messageItem上
+    messageItem._intervalId = setInterval(() => {
+        currentIndex = (currentIndex + 1) % loadingMessages.length;
+        messageBubble.textContent = loadingMessages[currentIndex];
+    }, 500);
 
     messageItem.appendChild(messageBubble);
     messageList.appendChild(messageItem);
@@ -75,9 +83,14 @@ function displayLoadingMessage() {
 
     return 'loadingMessage';
 }
+
 function removeLoadingMessage(loadingMessageId) {
     const loadingMessageElement = document.getElementById(loadingMessageId);
     if (loadingMessageElement) {
+        // 确保清除定时器
+        if (loadingMessageElement._intervalId) {
+            clearInterval(loadingMessageElement._intervalId);
+        }
         messageList.removeChild(loadingMessageElement);
     }
 }
@@ -101,39 +114,60 @@ function fetchDeepSeekResponse(message, loadingMessageId) {
                 }
             ],
             temperature: 0.7,
-            max_tokens: 2000
+            max_tokens: 2000,
+            enable_internet: true
         })
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        removeLoadingMessage(loadingMessageId); // 移除加载中消息
-        if (data && data.choices && data.choices[0] && data.choices[0].message) {
-            const reply = data.choices[0].message.content;
-            displayMessage(reply, 'received');
-            saveMessage(reply, 'received');
-        } else {
-            console.error('Invalid API response:', data);
-            throw new Error('Invalid response format');
-        }
-    })
-    .catch(error => {
-        removeLoadingMessage(loadingMessageId); // 移除加载中消息
-        console.error('Error:', error);
-        if (error.message.includes('Failed to fetch')) {
-            displayErrorMessage('无法连接到服务器，请检查您的网络连接。');
-        } else {
-            displayErrorMessage('抱歉，服务暂时出现问题，请稍后再试。');
-        }
-    });
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            removeLoadingMessage(loadingMessageId); // 移除加载中消息
+            if (data && data.choices && data.choices[0] && data.choices[0].message) {
+                const reply = data.choices[0].message.content;
+                displayMessage(reply, 'received');
+                saveMessage(reply, 'received');
+            } else {
+                console.error('Invalid API response:', data);
+                throw new Error('Invalid response format');
+            }
+        }).catch(error => {
+            removeLoadingMessage(loadingMessageId); // 移除加载中消息
+            console.error('Error:', error);
+            if (error.message.includes('Failed to fetch')) {
+                displayErrorMessage('无法连接到服务器，请检查您的网络连接。', message);
+            } else {
+                displayErrorMessage('抱歉，服务暂时出现问题，请稍后再试。', message);
+            }
+        });
 }
 // 显示错误消息
-function displayErrorMessage(errorMessage) {
-    displayMessage(errorMessage, 'received');
+function displayErrorMessage(errorMessage, retryMessage = null) {
+    const messageItem = document.createElement('div');
+    messageItem.classList.add('message-item', 'received', 'error-message');
+
+    const messageBubble = document.createElement('div');
+    messageBubble.classList.add('message-bubble');
+    messageBubble.textContent = errorMessage;
+
+    if (retryMessage) {
+        const refreshButton = document.createElement('button');
+        refreshButton.classList.add('refresh-button');
+        refreshButton.innerHTML = '&#x21bb;'; // 刷新图标
+        refreshButton.addEventListener('click', () => {
+            const loadingMessageId = displayLoadingMessage();
+            fetchDeepSeekResponse(retryMessage, loadingMessageId);
+        });
+        messageBubble.appendChild(refreshButton);
+    }
+
+    messageItem.appendChild(messageBubble);
+    messageList.appendChild(messageItem);
+    messageList.scrollTop = messageList.scrollHeight;
+
     saveMessage(errorMessage, 'received');
 }
 // 绑定发送按钮点击事件
