@@ -22,6 +22,16 @@
             background: rgba(254, 226, 226, 1);
         }
 
+        .input-area {
+            padding: 12px;
+            background: #f8f8f8;
+            border-top: 1px solid #ddd;
+            display: flex;
+            gap: 10px;
+            position: sticky;
+            bottom: 0;
+        }
+
         .message-item {
             display: flex;
             margin-bottom: 15px;
@@ -56,13 +66,6 @@
             margin-top: 5px;
         }
 
-        .input-area {
-            padding: 12px;
-            background: #f8f8f8;
-            border-top: 1px solid #ddd;
-            display: flex;
-            gap: 10px;
-        }
 
         .message-input {
             flex: 1;
@@ -73,6 +76,7 @@
             max-height: 100px;
             font-size: 16px;
             outline: none;
+            background: #fff;
         }
 
         .send-button {
@@ -131,42 +135,16 @@
         <div class="message-list" id="messageList">
             <div class="message-item received">
                 <div class="message-bubble">
-                    有什么想对我说的吗？
-                    <div class="error-message .message-bubble {
-                        background: #ffe6e6;
-                        border: 1px solid #ffcccc;
-                        border-radius: 15px;
-                        padding-right: 50px;
-                        position: relative;
-                    }
-                    
-                    .refresh-button {
-                        position: absolute;
-                        right: 10px;
-                        top: 50%;
-                        transform: translateY(-50%);
-                        background: none;
-                        border: none;
-                        cursor: pointer;
-                        color: #ff6666;
-                        font-size: 18px;
-                        padding: 5px;
-                    }
-                    
-                    .refresh-button:hover {
-                        color: #ff3333;
-                    }
+                    有什么相对我说的吗
                     <div class="timestamp text-gray-500">刚刚</div>
                 </div>
             </div>
         </div>
 
-        <div class="input-area bg-white/80 backdrop-blur-sm">
-            <textarea id="messageContent" class="message-input bg-white/90 backdrop-blur-sm" rows="1"
-                placeholder="输入消息..."
+        <div class="input-area">
+            <textarea id="messageContent" class="message-input" rows="1" placeholder="输入消息..."
                 oninput="this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'"></textarea>
-            <button id="submitBtn"
-                class="send-button bg-red-600 hover:bg-red-700 transition-colors duration-300">发送</button>
+            <button id="submitBtn" class="send-button">发送</button>
         </div>
     </div>
     <script src="script.js"></script>
