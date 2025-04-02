@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel生成器 - 纸盒人的网站</title>
+    <link rel="icon" href="./博客.png" type="image/png">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/3.2.1/dexie.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <style>
+        body {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+        html,
+        body {
+            overflow: auto;
+            height: 100%;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
+            max-width: 90%;
+            width: 400px;
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .modal-title {
+            color: #1a202c;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .modal-message {
+            color: #4a5568;
+            margin-bottom: 1.5rem;
+            white-space: pre-line;
+            line-height: 1.5;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        /* 自定义文件选择框样式 */
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-trigger {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background-color: #f7fafc;
+            border: 2px dashed #e2e8f0;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-wrapper:hover .file-input-trigger {
+            border-color: #cbd5e0;
+            background-color: #edf2f7;
+        }
+
+        .file-input-wrapper.has-file .file-input-trigger {
+            border-color: #9ae6b4;
+            background-color: #f0fff4;
+        }
+
+        .file-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+            margin-right: 0.75rem;
+            color: #718096;
+        }
+
+        .file-input-wrapper.has-file .file-icon {
+            color: #48bb78;
+        }
+
+        .file-label {
+            flex: 1;
+            color: #718096;
+            font-size: 0.875rem;
+        }
+
+        .file-name {
+            color: #2d3748;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+</head>
+
+<body class="from-red-50 to-white bg-gradient-to-b">
+    <nav class="bg-white/80 backdrop-blur-sm shadow-lg sticky top-0 z-50 bg-gradient-to-b">
+        <div class="container mx-auto px-4 py-3">
+            <ul class="flex space-x-6">
+                <li>
+                    <a href="index.html"
+                        class="px-4 py-2 font-medium text-white bg-red-600 rounded-lg shadow-md hover:bg-red-700 transition-all duration-300">
+                        首页
+                    </a>
+                </li>
+                <li>
+                    <a href="about.html"
+                        class="px-4 py-2 font-medium text-red-800 hover:bg-red-50 rounded-lg transition-all duration-300">
+                        关于我
+                    </a>
+                </li>
+                <li>
+                    <a href="contact.html"
+                        class="px-4 py-2 font-medium text-red-800 hover:bg-red-50 rounded-lg transition-all duration-300">
+                        联系我
+                    </a>
+                </li>
+                <li>
+                    <a href="home.html"
+                        class="px-4 py-2 font-medium text-red-800 hover:bg-red-50 rounded-lg transition-all duration-300">
+                        对话
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+            <h1 class="text-2xl font-bold text-red-800 mb-6">Excel数据复制工具</h1>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">源Excel文件</label>
+                    <div class="file-input-wrapper" id="sourceFileWrapper">
+                        <input type="file" id="sourceFile" accept=".xlsx,.xls" onchange="updateFileName(this, 'sourceFileName')">
+                        <div class="file-input-trigger">
+                            <svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <div class="file-label">
+                                <span id="sourceFileName">点击选择源Excel文件</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">目标Excel文件</label>
+                    <div class="file-input-wrapper" id="targetFileWrapper">
+                        <input type="file" id="targetFile" accept=".xlsx,.xls" onchange="updateFileName(this, 'targetFileName')">
+                        <div class="file-input-trigger">
+                            <svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <div class="file-label">
+                                <span id="targetFileName">点击选择目标Excel文件</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="columnMappings" class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">列映射设置</label>
+                    <div class="flex items-center space-x-2 mapping-row">
+                        <div class="flex-1">
+                            <input type="text" placeholder="源文件列（如：A）" 
+                                   class="source-col w-full p-2 border rounded-lg">
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-gray-500">→</span>
+                        </div>
+                        <div class="flex-1">
+                            <input type="text" placeholder="目标文件列（如：B）" 
+                                   class="target-col w-full p-2 border rounded-lg">
+                        </div>
+                        <button onclick="removeMapping(this)" 
+                                class="bg-red-100 text-red-600 px-3 py-2 rounded-lg hover:bg-red-200">
+                            删除
+                        </button>
+                    </div>
+                </div>
+
+                <button onclick="addNewMapping()" 
+                        class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-all duration-300 mb-4">
+                    添加新的列映射
+                </button>
+
+                <button onclick="generateExcel()" 
+                        class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-all duration-300">
+                    生成新Excel文件
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 自定义提示框 -->
+    <div id="customModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-title"></div>
+            <div class="modal-message"></div>
+            <button class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-all duration-300">
+                确定
+            </button>
+        </div>
+    </div>
+
+    <!-- 加载提示框 -->
+    <div id="loadingModal" class="modal-overlay">
+        <div class="modal-content text-center">
+            <svg class="loading-spinner inline-block w-12 h-12 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <div class="modal-message mt-4 text-gray-600"></div>
+        </div>
+    </div>
+
+    <script>
+        function updateFileName(input, targetId) {
+            const fileName = input.files[0]?.name || '点击选择Excel文件';
+            document.getElementById(targetId).textContent = fileName;
+            
+            // 更新包装器的状态
+            const wrapper = input.closest('.file-input-wrapper');
+            if (input.files.length > 0) {
+                wrapper.classList.add('has-file');
+            } else {
+                wrapper.classList.remove('has-file');
+            }
+        }
+
+        function readExcelFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        if (!workbook.SheetNames.length) {
+                            throw new Error('Excel文件中没有工作表');
+                        }
+                        console.log('工作表名称:', workbook.SheetNames);
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        // 检查工作表是否为空
+                        if (!firstSheet || !Object.keys(firstSheet).length) {
+                            throw new Error('工作表是空的');
+                        }
+                        // 获取工作表的范围
+                        const range = XLSX.utils.decode_range(firstSheet['!ref'] || 'A1');
+                        console.log('工作表范围:', range);
+                        const jsonData = XLSX.utils.sheet_to_json(firstSheet, {
+                            raw: true,
+                            defval: null,  // 空单元格的默认值设为null
+                            header: 'A'     // 使用A,B,C作为列标识
+                        });
+                        console.log('读取到的原始数据:', jsonData);
+                        if (!jsonData.length) {
+                            const data = [];
+                            for (let R = range.s.r; R <= range.e.r; ++R) {
+                                const row = {};
+                                for (let C = range.s.c; C <= range.e.c; ++C) {
+                                    const cell_address = {c: C, r: R};
+                                    const cell_ref = XLSX.utils.encode_cell(cell_address);
+                                    const cell = firstSheet[cell_ref];
+                                    const column_letter = XLSX.utils.encode_col(C);
+                                    row[column_letter] = cell ? cell.v : '';
+                                }
+                                data.push(row);
+                            }
+                            console.log('使用备用方法读取的数据:', data);
+                            resolve(data);
+                            return;
+                        }
+                        console.log('处理后的数据:', jsonData);
+                        resolve(jsonData);
+                    } catch (error) {
+                        console.error('读取Excel文件错误:', error);
+                        reject(new Error('读取Excel文件失败: ' + error.message));
+                    }
+                };
+                reader.onerror = (error) => {
+                    console.error('文件读取错误:', error);
+                    reject(new Error('文件读取失败'));
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }
+        function addNewMapping() {
+            const mappingsDiv = document.getElementById('columnMappings');
+            const newMapping = document.createElement('div');
+            newMapping.className = 'flex items-center space-x-2 mapping-row mt-2';
+            newMapping.innerHTML = `
+                <div class="flex-1">
+                    <input type="text" placeholder="源文件列（如：A）" 
+                           class="source-col w-full p-2 border rounded-lg">
+                </div>
+                <div class="flex items-center">
+                    <span class="text-gray-500">→</span>
+                </div>
+                <div class="flex-1">
+                    <input type="text" placeholder="目标文件列（如：B）" 
+                           class="target-col w-full p-2 border rounded-lg">
+                </div>
+                <button onclick="removeMapping(this)" 
+                        class="bg-red-100 text-red-600 px-3 py-2 rounded-lg hover:bg-red-200">
+                    删除
+                </button>
+            `;
+            mappingsDiv.appendChild(newMapping);
+        }
+        function removeMapping(button) {
+            const mappingRows = document.querySelectorAll('.mapping-row');
+            if (mappingRows.length > 1) {
+                button.closest('.mapping-row').remove();
+            } else {
+                showModal('提示', '至少需要保留一个列映射', 'error');
+            }
+        }
+        function getColumnMappings() {
+            const mappings = [];
+            document.querySelectorAll('.mapping-row').forEach(row => {
+                const sourceCol = row.querySelector('.source-col').value.trim().toUpperCase();
+                const targetCol = row.querySelector('.target-col').value.trim().toUpperCase();
+                if (sourceCol && targetCol) {
+                    mappings.push({ source: sourceCol, target: targetCol });
+                }
+            });
+            return mappings;
+        }
+        function mergeExcelData(sourceData, targetData, columnMappings) {
+            try {
+                console.log('开始合并数据');
+                console.log('源数据:', sourceData);
+                console.log('目标数据:', targetData);
+                console.log('列映射:', columnMappings);
+                const result = [...targetData];
+                // 遍历源数据中的每一行
+                sourceData.forEach(sourceRow => {
+                    // 创建新行对象
+                    const newRow = {};
+                    // 根据映射关系复制数据
+                    columnMappings.forEach(mapping => {
+                        if (sourceRow[mapping.source] !== undefined) {
+                            newRow[mapping.target] = sourceRow[mapping.source];
+                        }
+                    });
+                    // 将新行添加到结果中
+                    result.push(newRow);
+                });
+
+                console.log('合并后的数据:', result);
+                return result;
+            } catch (error) {
+                console.error('数据合并错误:', error);
+                alert('合并数据时出错：' + error.message);
+                return targetData;
+            }
+        }
+        function showModal(title, message, type = 'info') {
+            const modal = document.getElementById('customModal');
+            const titleEl = modal.querySelector('.modal-title');
+            const messageEl = modal.querySelector('.modal-message');
+            const button = modal.querySelector('button');
+
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            switch (type) {
+                case 'error':
+                    titleEl.className = 'modal-title text-red-600';
+                    button.className = 'w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-all duration-300';
+                    break;
+                case 'success':
+                    titleEl.className = 'modal-title text-green-600';
+                    button.className = 'w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-all duration-300';
+                    break;
+                default:
+                    titleEl.className = 'modal-title text-gray-800';
+                    button.className = 'w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-all duration-300';
+            }
+            modal.classList.add('show');
+            // 点击确定按钮关闭
+            button.onclick = () => modal.classList.remove('show');
+            // 点击背景关闭
+            modal.onclick = (e) => {
+                if (e.target === modal) modal.classList.remove('show');
+            };
+        }
+        // 加载提示框函数
+        function showLoading(message) {
+            const modal = document.getElementById('loadingModal');
+            const messageEl = modal.querySelector('.modal-message');
+            messageEl.textContent = message;
+            modal.classList.add('show');
+        }
+        function hideLoading() {
+            const modal = document.getElementById('loadingModal');
+            modal.classList.remove('show');
+        }
+        async function generateExcel() {
+            try {
+                const sourceFile = document.getElementById('sourceFile').files[0];
+                const targetFile = document.getElementById('targetFile').files[0];
+                const columnMappings = getColumnMappings();
+                
+                if (!sourceFile) {
+                    showModal('提示', '请选择源Excel文件', 'error');
+                    return;
+                }
+                if (!targetFile) {
+                    showModal('提示', '请选择目标Excel文件', 'error');
+                    return;
+                }
+                if (columnMappings.length === 0) {
+                    showModal('提示', '请至少设置一个有效的列映射', 'error');
+                    return;
+                }
+                // 验证列标识格式
+                const isValidColumn = col => /^[A-Z]+$/.test(col);
+                for (const mapping of columnMappings) {
+                    if (!isValidColumn(mapping.source)) {
+                        showModal('格式错误', `无效的源文件列标识：${mapping.source}\n请使用字母（如：A、B、C）`, 'error');
+                        return;
+                    }
+                    if (!isValidColumn(mapping.target)) {
+                        showModal('格式错误', `无效的目标文件列标识：${mapping.target}\n请使用字母（如：A、B、C）`, 'error');
+                        return;
+                    }
+                }
+                showLoading('正在处理Excel文件，请稍候...')
+                // 读取源文件
+                console.log('正在读取源文件...');
+                const sourceData = await readExcelFile(sourceFile);
+                console.log('源文件读取完成，数据行数:', sourceData.length);
+                // 读取目标文件
+                console.log('正在读取目标文件...');
+                const targetData = await readExcelFile(targetFile);
+                console.log('目标文件读取完成，数据行数:', targetData.length);
+                if (!sourceData.length) {
+                    hideLoading();
+                    showModal('错误', '源文件中没有数据，请检查文件是否正确', 'error');
+                    return;
+                }
+                const mergedData = mergeExcelData(sourceData, targetData, columnMappings);
+                // 生成新文件
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.json_to_sheet(mergedData, {skipHeader: true});
+                XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                XLSX.writeFile(wb, `新的文件_${timestamp}.xlsx`);
+                
+                hideLoading();
+                const mappingText = columnMappings
+                    .map(m => `${m.source}列 → ${m.target}列`)
+                    .join('\n');
+                showModal('成功', `文件生成成功！\n已将源文件的数据追加到目标文件的末尾\n\n列映射关系：\n${mappingText}`, 'success');
+            } catch (error) {
+                hideLoading();
+                console.error('处理过程中出错:', error);
+                showModal('错误', `处理Excel文件时出错：${error.message}\n\n请按F12打开控制台查看详细错误信息`, 'error');
+            }
+        }
+    </script>
+</body>
+
+</html>
