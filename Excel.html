@@ -393,7 +393,6 @@
                 console.log('目标数据:', targetData);
                 console.log('列映射:', columnMappings);
                 const result = [...targetData];
-                // 遍历源数据中的每一行
                 sourceData.forEach(sourceRow => {
                     // 创建新行对象
                     const newRow = {};
@@ -403,7 +402,6 @@
                             newRow[mapping.target] = sourceRow[mapping.source];
                         }
                     });
-                    // 将新行添加到结果中
                     result.push(newRow);
                 });
 
@@ -437,9 +435,7 @@
                     button.className = 'w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-all duration-300';
             }
             modal.classList.add('show');
-            // 点击确定按钮关闭
             button.onclick = () => modal.classList.remove('show');
-            // 点击背景关闭
             modal.onclick = (e) => {
                 if (e.target === modal) modal.classList.remove('show');
             };

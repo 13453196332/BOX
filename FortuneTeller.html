@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>吃啥 - 纸盒人的网站</title>
+    <link rel="icon" href="./博客.png" type="image/png">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="./css/animations.css" rel="stylesheet">
+    <style>
+        .food-item {
+            position: fixed;
+            /* 改为 fixed，使其相对于视窗定位 */
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: rgba(255, 69, 0, 0.9);
+            animation: fadeMove 1.8s ease-in-out forwards;
+            white-space: nowrap;
+        }
+
+        @keyframes fadeMove {
+            0% {
+                opacity: 0;
+                transform: translateY(50px) scale(0.8) rotate(0deg);
+            }
+
+            50% {
+                opacity: 1;
+                transform: translateY(0) scale(1) rotate(10deg);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-50px) scale(1.2) rotate(-10deg);
+            }
+        }
+
+        #foodContainer {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            width: 90%;
+            max-width: 400px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            visibility: visible;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 16px;
+            text-align: center;
+            color: #333;
+        }
+
+        .modal ul {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 16px;
+            padding: 0;
+            list-style: none;
+        }
+
+        .modal ul li {
+            padding: 8px 12px;
+            background: #fff;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-size: 0.9rem;
+            color: #555;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal ul li button {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .modal ul li button:hover {
+            background-color: #e53935;
+        }
+
+        .modal ul li:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal .input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal input {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 0.9rem;
+        }
+
+        .modal button {
+            padding: 8px 12px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .modal button:hover {
+            background-color: #45a049;
+        }
+
+        .modal .close-button {
+            background-color: #f44336;
+        }
+
+        .modal .close-button:hover {
+            background-color: #e53935;
+        }
+
+        .disabled {
+            background-color: #ccc !important;
+            cursor: not-allowed !important;
+        }
+
+        .tooltip {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            display: none;
+        }
+
+        .menu-button-container {
+            position: relative;
+        }
+
+        .menu-button-container:hover .tooltip {
+            display: block;
+        }
+    </style>
+</head>
+
+<body class="from-red-50 to-white">
+    <nav class="bg-white/80 backdrop-blur-sm shadow-lg sticky top-0 z-50 bg-gradient-to-b">
+        <div class="container mx-auto px-4 py-3">
+            <ul class="flex space-x-6">
+                <li>
+                    <a href="index.html"
+                        class="px-4 py-2 font-medium text-white bg-red-600 rounded-lg shadow-md hover:bg-red-700 transition-all duration-300">
+                        首页
+                    </a>
+                </li>
+                <li>
+                    <a href="about.html"
+                        class="px-4 py-2 font-medium text-red-800 hover:bg-red-50 rounded-lg transition-all duration-300">
+                        关于我
+                    </a>
+                </li>
+                <li>
+                    <a href="contact.html"
+                        class="px-4 py-2 font-medium text-red-800 hover:bg-red-50 rounded-lg transition-all duration-300">
+                        联系我
+                    </a>
+                </li>
+                <li>
+                    <a href="home.html"
+                        class="px-4 py-2 font-medium text-red-800 hover:bg-red-50 rounded-lg transition-all duration-300">
+                        对话
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container mx-auto px-4 py-12 text-center relative">
+        <h1 id="result" class="text-2xl font-bold mb-6">今天吃啥呀？</h1>
+        <div class="flex justify-center space-x-4">
+            <button id="startButton"
+                class="px-6 py-3 font-medium text-white bg-red-600 rounded-lg shadow-md hover:bg-red-700 transition-all duration-300">
+                开始
+            </button>
+            <div class="menu-button-container">
+                <button id="menuButton"
+                    class="px-6 py-3 font-medium text-white bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 transition-all duration-300">
+                    菜单
+                </button>
+                <div class="tooltip">请先停止随机展示</div>
+            </div>
+        </div>
+        <div id="foodContainer" class="relative w-full h-96 overflow-hidden mt-6"></div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="modal" id="menuModal">
+        <h2>菜单列表</h2>
+        <ul id="menuList">
+            <!-- 菜单项将动态插入 -->
+        </ul>
+        <div class="input-group">
+            <input type="text" id="newFoodInput" placeholder="新增菜品">
+            <button id="addFoodButton">新增</button>
+        </div>
+        <button id="closeModalButton" class="close-button mt-4">关闭</button>
+    </div>
+
+    <script>
+        const foodOptions = [
+            "馄饨", "烩面", "热干面", "刀削面", "油泼面", "炸酱面", "炒面", "重庆小面", "米线", "酸辣粉", "土豆粉", "螺狮粉", "凉皮儿",
+            "麻辣烫", "肉夹馍", "羊肉泡馍", "炒饭", "盖浇饭", "烤肉饭", "黄焖鸡米饭", "麻辣香锅", "火锅", "酸菜鱼", "烤串", "披萨",
+            "烤鸭", "汉堡", "炸鸡", "寿司", "煎饼果子", "南瓜粥", "小龙虾", "牛排", "砂锅", "大排档", "馒头", "西餐", "自助餐",
+            "小笼包", "水果", "西北风", "烧烤", "泡面", "水饺", "日本料理", "涮羊肉", "兰州拉面", "肯德基", "面包", "臊子面",
+            "小笼包", "麦当劳", "沙县小吃", "烤鱼", "海鲜", "铁板烧", "韩国料理", "甜点", "鸭血粉丝汤"
+        ];
+
+        const resultElement = document.getElementById('result');
+        const startButton = document.getElementById('startButton');
+        const menuButton = document.getElementById('menuButton');
+        const foodContainer = document.getElementById('foodContainer');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const menuModal = document.getElementById('menuModal');
+        const menuList = document.getElementById('menuList');
+        const newFoodInput = document.getElementById('newFoodInput');
+        const addFoodButton = document.getElementById('addFoodButton');
+        const closeModalButton = document.getElementById('closeModalButton');
+        let intervalId = null;
+        let scrollIntervalId = null;
+
+        function createFoodItem(food) {
+            const foodItem = document.createElement('div');
+            foodItem.textContent = food;
+            foodItem.className = 'food-item';
+            foodItem.style.left = `${Math.random() * 100}%`;
+            foodItem.style.top = `${Math.random() * 100}%`;
+            foodItem.style.color = `hsl(${Math.random() * 360}, 70%, 50%)`;
+            document.body.appendChild(foodItem);
+
+            setTimeout(() => {
+                document.body.removeChild(foodItem);
+            }, 1800);
+        }
+
+        function updateMenuList() {
+            menuList.innerHTML = '';
+            foodOptions.forEach((food, index) => {
+                const li = document.createElement('li');
+                li.textContent = food;
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = '删除';
+                deleteButton.addEventListener('click', () => {
+                    foodOptions.splice(index, 1);
+                    updateMenuList();
+                });
+
+                li.appendChild(deleteButton);
+                menuList.appendChild(li);
+            });
+        }
+
+        function startScrollingFoodOptions() {
+            const foodList = [...foodOptions];
+            let index = 0;
+
+            scrollIntervalId = setInterval(() => {
+                resultElement.textContent = `今天吃：${foodList[index]}`;
+                index = (index + 1) % foodList.length;
+            }, 100);
+        }
+
+        function stopScrollingFoodOptions() {
+            clearInterval(scrollIntervalId);
+            scrollIntervalId = null;
+            const randomFood = foodOptions[Math.floor(Math.random() * foodOptions.length)];
+            resultElement.textContent = `今天吃：${randomFood}`;
+        }
+
+        startButton.addEventListener('click', () => {
+            if (!intervalId) {
+                startButton.textContent = '停止';
+                menuButton.classList.add('disabled');
+                menuButton.disabled = true;
+
+                intervalId = setInterval(() => {
+                    for (let i = 0; i < 5; i++) {
+                        const randomFood = foodOptions[Math.floor(Math.random() * foodOptions.length)];
+                        createFoodItem(randomFood);
+                    }
+                }, 300);
+
+                startScrollingFoodOptions();
+            } else {
+                startButton.textContent = '开始';
+                menuButton.classList.remove('disabled');
+                menuButton.disabled = false;
+
+                clearInterval(intervalId);
+                intervalId = null;
+
+                stopScrollingFoodOptions();
+            }
+        });
+
+        menuButton.addEventListener('click', () => {
+            if (!menuButton.disabled) {
+                updateMenuList();
+                modalOverlay.classList.add('show');
+                menuModal.classList.add('show');
+            }
+        });
+
+        closeModalButton.addEventListener('click', () => {
+            modalOverlay.classList.remove('show');
+            menuModal.classList.remove('show');
+        });
+
+        addFoodButton.addEventListener('click', () => {
+            const newFood = newFoodInput.value.trim();
+            if (newFood && !foodOptions.includes(newFood)) {
+                foodOptions.push(newFood);
+                updateMenuList();
+                newFoodInput.value = '';
+            }
+        });
+
+        modalOverlay.addEventListener('click', () => {
+            modalOverlay.classList.remove('show');
+            menuModal.classList.remove('show');
+        });
+    </script>
+</body>
+
+</html>
+``` 
