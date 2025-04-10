@@ -26,7 +26,13 @@ function displayMessage(content, type, date = new Date()) {
 
     const messageBubble = document.createElement('div');
     messageBubble.classList.add('message-bubble');
-    messageBubble.textContent = content;
+
+    // 使用 marked.js 解析富文本内容
+    if (type === 'received') {
+        messageBubble.innerHTML = marked.parse(content);
+    } else {
+        messageBubble.textContent = content;
+    }
 
     const timestamp = document.createElement('div');
     timestamp.classList.add('timestamp');
@@ -47,14 +53,9 @@ function sendMessage() {
     if (content) {
         displayMessage(content, 'sent');
         saveMessage(content, 'sent');
-
-        // 清空输入框
         messageContent.value = '';
         messageContent.style.height = 'auto';
-
-        // 显示加载中消息
         const loadingMessageId = displayLoadingMessage();
-
         // 调用 DeepSeek API
         fetchDeepSeekResponse(content, loadingMessageId);
     }
@@ -125,7 +126,7 @@ function fetchDeepSeekResponse(message, loadingMessageId) {
             return response.json();
         })
         .then(data => {
-            removeLoadingMessage(loadingMessageId); // 移除加载中消息
+            removeLoadingMessage(loadingMessageId);
             if (data && data.choices && data.choices[0] && data.choices[0].message) {
                 const reply = data.choices[0].message.content;
                 displayMessage(reply, 'received');
@@ -135,7 +136,7 @@ function fetchDeepSeekResponse(message, loadingMessageId) {
                 throw new Error('Invalid response format');
             }
         }).catch(error => {
-            removeLoadingMessage(loadingMessageId); // 移除加载中消息
+            removeLoadingMessage(loadingMessageId);
             console.error('Error:', error);
             if (error.message.includes('Failed to fetch')) {
                 displayErrorMessage('无法连接到服务器，请检查您的网络连接。', message);
