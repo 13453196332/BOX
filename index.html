@@ -78,6 +78,15 @@
                     <div class="text-sm text-gray-500" id="date3"></div>
                 </div>
             </article>
+            <article
+                class="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:scale-105 animate-fade-in-up delay-200 bg-gradient-to-b">
+                <div class="p-6">
+                    <h2 class="text-xl font-semibold text-red-800 mb-2">Web的3D</h2>
+                    <a href="new3D.html"
+                        class="inline-block px-6 py-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors duration-300">跳转</a>
+                    <div class="text-sm text-gray-500" id="date4"></div>
+                </div>
+            </article>
         </div>
         </main>
     </div>
@@ -170,6 +179,7 @@
         document.getElementById('date1').textContent = formattedDate;
         document.getElementById('date2').textContent = formattedDate;
         document.getElementById('date3').textContent = formattedDate;
+        document.getElementById('date4').textContent = formattedDate;
         function updateTime() {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
