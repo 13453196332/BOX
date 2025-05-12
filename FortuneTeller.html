@@ -9,9 +9,107 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="./css/animations.css" rel="stylesheet">
     <style>
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            /* 动态渐变背景 */
+            background: linear-gradient(120deg, #ff6a00, #ee0979, #00c3ff, #92fe9d, #f7971e, #ffd200, #f953c6, #b91d73);
+            background-size: 1600% 1600%;
+            animation: gradientBG 18s ease infinite;
+            min-height: 100vh;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+        html,
+        body {
+            overflow: auto;
+            height: 100%;
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%
+            }
+
+            25% {
+                background-position: 50% 100%
+            }
+
+            50% {
+                background-position: 100% 50%
+            }
+
+            75% {
+                background-position: 50% 0%
+            }
+
+            100% {
+                background-position: 0% 50%
+            }
+        }
+
+        .main-header {
+            text-shadow: 0 2px 16px rgba(255, 71, 87, 0.08);
+            letter-spacing: 2px;
+        }
+
+        .main-subtitle {
+            color: #ff4757;
+            opacity: 0.85;
+        }
+
+        .card-date {
+            font-size: 0.95rem;
+            color: #b0b0b0;
+        }
+
+        /* 优化动画 */
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fade-in 1s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        @keyframes fade-in-up {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in-up {
+            animation: fade-in-up 0.8s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        .delay-100 {
+            animation-delay: 0.15s;
+        }
+
+        .delay-200 {
+            animation-delay: 0.3s;
+        }
+
         .food-item {
             position: fixed;
-            /* 改为 fixed，使其相对于视窗定位 */
             font-size: 1.2rem;
             font-weight: bold;
             color: rgba(255, 69, 0, 0.9);
@@ -196,38 +294,9 @@
     </style>
 </head>
 
-<body class="from-red-50 to-white">
-    <nav class="bg-white/80 backdrop-blur-sm shadow-lg sticky top-0 z-50 bg-gradient-to-b">
-        <div class="container mx-auto px-4 py-3">
-            <ul class="flex space-x-6">
-                <li>
-                    <a href="index.html"
-                        class="px-4 py-2 font-medium text-white bg-red-600 rounded-lg shadow-md hover:bg-red-700 transition-all duration-300">
-                        首页
-                    </a>
-                </li>
-                <li>
-                    <a href="about.html"
-                        class="px-4 py-2 font-medium text-red-800 hover:bg-red-50 rounded-lg transition-all duration-300">
-                        关于我
-                    </a>
-                </li>
-                <li>
-                    <a href="contact.html"
-                        class="px-4 py-2 font-medium text-red-800 hover:bg-red-50 rounded-lg transition-all duration-300">
-                        联系我
-                    </a>
-                </li>
-                <li>
-                    <a href="home.html"
-                        class="px-4 py-2 font-medium text-red-800 hover:bg-red-50 rounded-lg transition-all duration-300">
-                        对话
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </nav>
-    <div class="container mx-auto px-4 py-12 text-center relative">
+<body>
+    <div id="nav-placeholder" style="position:fixed;top:0;left:0;width:100%;z-index:1000;"></div>
+    <div class="container mx-auto px-4 py-12 text-center relative" style="margin-top:90px;">
         <h1 id="result" class="text-2xl font-bold mb-6">今天吃啥呀？</h1>
         <div class="flex justify-center space-x-4">
             <button id="startButton"
@@ -260,6 +329,12 @@
     </div>
 
     <script>
+        // 动态加载 nav.html
+        fetch('nav.html')
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById('nav-placeholder').innerHTML = html;
+            });
         const foodOptions = [
             "馄饨", "烩面", "热干面", "刀削面", "油泼面", "炸酱面", "炒面", "重庆小面", "米线", "酸辣粉", "土豆粉", "螺狮粉", "凉皮儿",
             "麻辣烫", "肉夹馍", "羊肉泡馍", "炒饭", "盖浇饭", "烤肉饭", "黄焖鸡米饭", "麻辣香锅", "火锅", "酸菜鱼", "烤串", "披萨",

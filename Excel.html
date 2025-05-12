@@ -11,6 +11,12 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
         body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            /* 动态渐变背景 */
+            background: linear-gradient(120deg, #ff6a00, #ee0979, #00c3ff, #92fe9d, #f7971e, #ffd200, #f953c6, #b91d73);
+            background-size: 1600% 1600%;
+            animation: gradientBG 18s ease infinite;
+            min-height: 100vh;
             scrollbar-width: none;
             -ms-overflow-style: none;
         }
@@ -25,6 +31,85 @@
             height: 100%;
         }
 
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%
+            }
+
+            25% {
+                background-position: 50% 100%
+            }
+
+            50% {
+                background-position: 100% 50%
+            }
+
+            75% {
+                background-position: 50% 0%
+            }
+
+            100% {
+                background-position: 0% 50%
+            }
+        }
+
+        .main-header {
+            text-shadow: 0 2px 16px rgba(255, 71, 87, 0.08);
+            letter-spacing: 2px;
+        }
+
+        .main-subtitle {
+            color: #ff4757;
+            opacity: 0.85;
+        }
+
+        .card-date {
+            font-size: 0.95rem;
+            color: #b0b0b0;
+        }
+
+        /* 优化动画 */
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fade-in 1s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        @keyframes fade-in-up {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in-up {
+            animation: fade-in-up 0.8s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        .delay-100 {
+            animation-delay: 0.15s;
+        }
+
+        .delay-200 {
+            animation-delay: 0.3s;
+        }
+
+        /* 下面为原有样式... */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -152,49 +237,23 @@
     </style>
 </head>
 
-<body class="from-red-50 to-white bg-gradient-to-b">
-    <nav class="bg-white/80 backdrop-blur-sm shadow-lg sticky top-0 z-50 bg-gradient-to-b">
-        <div class="container mx-auto px-4 py-3">
-            <ul class="flex space-x-6">
-                <li>
-                    <a href="index.html"
-                        class="px-4 py-2 font-medium text-white bg-red-600 rounded-lg shadow-md hover:bg-red-700 transition-all duration-300">
-                        首页
-                    </a>
-                </li>
-                <li>
-                    <a href="about.html"
-                        class="px-4 py-2 font-medium text-red-800 hover:bg-red-50 rounded-lg transition-all duration-300">
-                        关于我
-                    </a>
-                </li>
-                <li>
-                    <a href="contact.html"
-                        class="px-4 py-2 font-medium text-red-800 hover:bg-red-50 rounded-lg transition-all duration-300">
-                        联系我
-                    </a>
-                </li>
-                <li>
-                    <a href="home.html"
-                        class="px-4 py-2 font-medium text-red-800 hover:bg-red-50 rounded-lg transition-all duration-300">
-                        对话
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </nav>
-    <div class="container mx-auto px-4 py-8">
+<body>
+    <div id="nav-placeholder" style="position:fixed;top:0;left:0;width:100%;z-index:1000;"></div>
+    <div class="container mx-auto px-4 py-8" style="margin-top:90px;">
         <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
             <h1 class="text-2xl font-bold text-red-800 mb-6">Excel数据复制工具</h1>
-            
+
             <div class="space-y-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">源Excel文件</label>
                     <div class="file-input-wrapper" id="sourceFileWrapper">
-                        <input type="file" id="sourceFile" accept=".xlsx,.xls" onchange="updateFileName(this, 'sourceFileName')">
+                        <input type="file" id="sourceFile" accept=".xlsx,.xls"
+                            onchange="updateFileName(this, 'sourceFileName')">
                         <div class="file-input-trigger">
                             <svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                </path>
                             </svg>
                             <div class="file-label">
                                 <span id="sourceFileName">点击选择源Excel文件</span>
@@ -202,14 +261,17 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">目标Excel文件</label>
                     <div class="file-input-wrapper" id="targetFileWrapper">
-                        <input type="file" id="targetFile" accept=".xlsx,.xls" onchange="updateFileName(this, 'targetFileName')">
+                        <input type="file" id="targetFile" accept=".xlsx,.xls"
+                            onchange="updateFileName(this, 'targetFileName')">
                         <div class="file-input-trigger">
                             <svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                </path>
                             </svg>
                             <div class="file-label">
                                 <span id="targetFileName">点击选择目标Excel文件</span>
@@ -222,30 +284,28 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">列映射设置</label>
                     <div class="flex items-center space-x-2 mapping-row">
                         <div class="flex-1">
-                            <input type="text" placeholder="源文件列（如：A）" 
-                                   class="source-col w-full p-2 border rounded-lg">
+                            <input type="text" placeholder="源文件列（如：A）" class="source-col w-full p-2 border rounded-lg">
                         </div>
                         <div class="flex items-center">
                             <span class="text-gray-500">→</span>
                         </div>
                         <div class="flex-1">
-                            <input type="text" placeholder="目标文件列（如：B）" 
-                                   class="target-col w-full p-2 border rounded-lg">
+                            <input type="text" placeholder="目标文件列（如：B）" class="target-col w-full p-2 border rounded-lg">
                         </div>
-                        <button onclick="removeMapping(this)" 
-                                class="bg-red-100 text-red-600 px-3 py-2 rounded-lg hover:bg-red-200">
+                        <button onclick="removeMapping(this)"
+                            class="bg-red-100 text-red-600 px-3 py-2 rounded-lg hover:bg-red-200">
                             删除
                         </button>
                     </div>
                 </div>
 
-                <button onclick="addNewMapping()" 
-                        class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-all duration-300 mb-4">
+                <button onclick="addNewMapping()"
+                    class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-all duration-300 mb-4">
                     添加新的列映射
                 </button>
 
-                <button onclick="generateExcel()" 
-                        class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-all duration-300">
+                <button onclick="generateExcel()"
+                    class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-all duration-300">
                     生成新Excel文件
                 </button>
             </div>
@@ -257,7 +317,8 @@
         <div class="modal-content">
             <div class="modal-title"></div>
             <div class="modal-message"></div>
-            <button class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-all duration-300">
+            <button
+                class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-all duration-300">
                 确定
             </button>
         </div>
@@ -266,19 +327,28 @@
     <!-- 加载提示框 -->
     <div id="loadingModal" class="modal-overlay">
         <div class="modal-content text-center">
-            <svg class="loading-spinner inline-block w-12 h-12 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <svg class="loading-spinner inline-block w-12 h-12 text-red-600" xmlns="http://www.w3.org/2000/svg"
+                fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
             </svg>
             <div class="modal-message mt-4 text-gray-600"></div>
         </div>
     </div>
 
     <script>
+        // 动态加载 nav.html
+        fetch('nav.html')
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById('nav-placeholder').innerHTML = html;
+            });
         function updateFileName(input, targetId) {
             const fileName = input.files[0]?.name || '点击选择Excel文件';
             document.getElementById(targetId).textContent = fileName;
-            
+
             // 更新包装器的状态
             const wrapper = input.closest('.file-input-wrapper');
             if (input.files.length > 0) {
@@ -291,7 +361,7 @@
         function readExcelFile(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     try {
                         const data = new Uint8Array(e.target.result);
                         const workbook = XLSX.read(data, { type: 'array' });
@@ -318,7 +388,7 @@
                             for (let R = range.s.r; R <= range.e.r; ++R) {
                                 const row = {};
                                 for (let C = range.s.c; C <= range.e.c; ++C) {
-                                    const cell_address = {c: C, r: R};
+                                    const cell_address = { c: C, r: R };
                                     const cell_ref = XLSX.utils.encode_cell(cell_address);
                                     const cell = firstSheet[cell_ref];
                                     const column_letter = XLSX.utils.encode_col(C);
@@ -456,7 +526,7 @@
                 const sourceFile = document.getElementById('sourceFile').files[0];
                 const targetFile = document.getElementById('targetFile').files[0];
                 const columnMappings = getColumnMappings();
-                
+
                 if (!sourceFile) {
                     showModal('提示', '请选择源Excel文件', 'error');
                     return;
@@ -498,11 +568,11 @@
                 const mergedData = mergeExcelData(sourceData, targetData, columnMappings);
                 // 生成新文件
                 const wb = XLSX.utils.book_new();
-                const ws = XLSX.utils.json_to_sheet(mergedData, {skipHeader: true});
+                const ws = XLSX.utils.json_to_sheet(mergedData, { skipHeader: true });
                 XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
                 const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
                 XLSX.writeFile(wb, `新的文件_${timestamp}.xlsx`);
-                
+
                 hideLoading();
                 const mappingText = columnMappings
                     .map(m => `${m.source}列 → ${m.target}列`)
