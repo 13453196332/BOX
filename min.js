@@ -21,32 +21,95 @@ function loadChatHistory() {
 }
 // 显示消息
 function displayMessage(content, type, date = new Date()) {
-    const messageItem = document.createElement('div');
-    messageItem.classList.add('message-item', type);
+    // type: 'sent'（用户） or 'received'（AI）
+    const row = document.createElement('div');
+    row.className = 'chat-row ' + (type === 'sent' ? 'user' : 'ai');
 
-    const messageBubble = document.createElement('div');
-    messageBubble.classList.add('message-bubble');
-
-    // 使用 marked.js 解析富文本内容
-    if (type === 'received') {
-        messageBubble.innerHTML = marked.parse(content);
+    // 头像
+    const avatar = document.createElement('div');
+    avatar.className = 'chat-avatar';
+    if (type === 'sent') {
+        avatar.innerHTML = '<i class="fas fa-user"></i>';
     } else {
-        messageBubble.textContent = content;
+        avatar.innerHTML = '<i class="fas fa-robot"></i>';
     }
 
-    const timestamp = document.createElement('div');
-    timestamp.classList.add('timestamp');
-    timestamp.textContent = `${type === 'sent' ? '你' : 'DeepSeek'} ${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}`;
+    // 气泡
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-bubble';
+    if (type === 'received') {
+        bubble.innerHTML = marked.parse(content);
+    } else {
+        bubble.textContent = content;
+    }
 
-    messageBubble.appendChild(timestamp);
-    messageItem.appendChild(messageBubble);
-    messageList.appendChild(messageItem);
-    // 滚动到最新消息
+    // 时间
+    const timestamp = document.createElement('div');
+    timestamp.className = 'chat-timestamp';
+    timestamp.textContent = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+
+    // 组装
+    if (type === 'sent') {
+        row.appendChild(avatar);
+        row.appendChild(bubble);
+        row.appendChild(timestamp);
+    } else {
+        row.appendChild(avatar);
+        row.appendChild(bubble);
+        row.appendChild(timestamp);
+    }
+
+    messageList.appendChild(row);
     messageList.scrollTop = messageList.scrollHeight;
 }
-// 设置系统消息时间
-// const now = new Date();
-// systemTimestamp.textContent = `系统消息 ${now.getHours()}:${now.getMinutes()}`;
+
+// 重写 displayLoadingMessage 以适配新结构
+function displayLoadingMessage() {
+    const loadingMessages = ["加载中", "加载中.", "加载中..", "加载中..."];
+    let currentIndex = 0;
+
+    const row = document.createElement('div');
+    row.className = 'chat-row ai loading';
+    row.setAttribute('id', 'loadingMessage');
+
+    const avatar = document.createElement('div');
+    avatar.className = 'chat-avatar';
+    avatar.innerHTML = '<i class="fas fa-robot"></i>';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-bubble';
+    bubble.textContent = loadingMessages[currentIndex];
+
+    row._intervalId = setInterval(() => {
+        currentIndex = (currentIndex + 1) % loadingMessages.length;
+        bubble.textContent = loadingMessages[currentIndex];
+    }, 500);
+
+    row.appendChild(avatar);
+    row.appendChild(bubble);
+
+    const timestamp = document.createElement('div');
+    timestamp.className = 'chat-timestamp';
+    const now = new Date();
+    timestamp.textContent = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    row.appendChild(timestamp);
+
+    messageList.appendChild(row);
+    messageList.scrollTop = messageList.scrollHeight;
+
+    return 'loadingMessage';
+}
+
+function removeLoadingMessage(loadingMessageId) {
+    const loadingMessageElement = document.getElementById(loadingMessageId);
+    if (loadingMessageElement) {
+        if (loadingMessageElement._intervalId) {
+            clearInterval(loadingMessageElement._intervalId);
+        }
+        messageList.removeChild(loadingMessageElement);
+    }
+}
+
 // 发送消息函数
 function sendMessage() {
     const content = messageContent.value.trim();
@@ -58,41 +121,6 @@ function sendMessage() {
         const loadingMessageId = displayLoadingMessage();
         // 调用 DeepSeek API
         fetchDeepSeekResponse(content, loadingMessageId);
-    }
-}
-function displayLoadingMessage() {
-    const loadingMessages = ["加载中", "加载中.", "加载中..", "加载中..."];
-    let currentIndex = 0;
-
-    const messageItem = document.createElement('div');
-    messageItem.classList.add('message-item', 'received', 'loading');
-    messageItem.setAttribute('id', 'loadingMessage');
-
-    const messageBubble = document.createElement('div');
-    messageBubble.classList.add('message-bubble');
-    messageBubble.textContent = loadingMessages[currentIndex];
-
-    // 将定时器ID存储在messageItem上
-    messageItem._intervalId = setInterval(() => {
-        currentIndex = (currentIndex + 1) % loadingMessages.length;
-        messageBubble.textContent = loadingMessages[currentIndex];
-    }, 500);
-
-    messageItem.appendChild(messageBubble);
-    messageList.appendChild(messageItem);
-    messageList.scrollTop = messageList.scrollHeight;
-
-    return 'loadingMessage';
-}
-
-function removeLoadingMessage(loadingMessageId) {
-    const loadingMessageElement = document.getElementById(loadingMessageId);
-    if (loadingMessageElement) {
-        // 确保清除定时器
-        if (loadingMessageElement._intervalId) {
-            clearInterval(loadingMessageElement._intervalId);
-        }
-        messageList.removeChild(loadingMessageElement);
     }
 }
 function fetchDeepSeekResponse(message, loadingMessageId) {
@@ -146,27 +174,40 @@ function fetchDeepSeekResponse(message, loadingMessageId) {
         });
 }
 // 显示错误消息
+// 重写 displayErrorMessage 以适配新结构
 function displayErrorMessage(errorMessage, retryMessage = null) {
-    const messageItem = document.createElement('div');
-    messageItem.classList.add('message-item', 'received', 'error-message');
+    const row = document.createElement('div');
+    row.className = 'chat-row ai error-message';
 
-    const messageBubble = document.createElement('div');
-    messageBubble.classList.add('message-bubble');
-    messageBubble.textContent = errorMessage;
+    const avatar = document.createElement('div');
+    avatar.className = 'chat-avatar';
+    avatar.innerHTML = '<i class="fas fa-robot"></i>';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-bubble';
+    bubble.textContent = errorMessage;
 
     if (retryMessage) {
         const refreshButton = document.createElement('button');
         refreshButton.classList.add('refresh-button');
-        refreshButton.innerHTML = '&#x21bb;'; // 刷新图标
+        refreshButton.innerHTML = '&#x21bb;';
         refreshButton.addEventListener('click', () => {
             const loadingMessageId = displayLoadingMessage();
             fetchDeepSeekResponse(retryMessage, loadingMessageId);
         });
-        messageBubble.appendChild(refreshButton);
+        bubble.appendChild(refreshButton);
     }
 
-    messageItem.appendChild(messageBubble);
-    messageList.appendChild(messageItem);
+    row.appendChild(avatar);
+    row.appendChild(bubble);
+
+    const timestamp = document.createElement('div');
+    timestamp.className = 'chat-timestamp';
+    const now = new Date();
+    timestamp.textContent = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    row.appendChild(timestamp);
+
+    messageList.appendChild(row);
     messageList.scrollTop = messageList.scrollHeight;
 
     saveMessage(errorMessage, 'received');

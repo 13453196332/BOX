@@ -4,108 +4,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>首页 - 纸盒人的网站</title>
+    <title>纸盒人的网站</title>
+    <meta name="description" content="纸盒人的个人网站 - 编码、工具与生活">
     <link rel="icon" href="./博客.png" type="image/png">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="./css/animations.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3B82F6",
+                        secondary: "#1E40AF",
+                        accent: "#10B981",
+                        dark: "#1F2937",
+                        light: "#F9FAFB"
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body {
-            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
-            /* 动态渐变背景 */
-            background: linear-gradient(120deg, #ff6a00, #ee0979, #00c3ff, #92fe9d, #f7971e, #ffd200, #f953c6, #b91d73);
-            background-size: 1600% 1600%;
-            animation: gradientBG 18s ease infinite;
-            min-height: 100vh;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+        .gradient-text {
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, #3B82F6, #10B981);
         }
-        body::-webkit-scrollbar {
-            display: none;
+        @keyframes slide-in {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(0);
+            }
         }
-        html, body {
-            overflow: auto;
-            height: 100%;
+        .animate-slide-in {
+            animation: slide-in 0.25s cubic-bezier(.4, 0, .2, 1);
         }
-        @keyframes gradientBG {
-            0% {background-position:0% 50%}
-            25% {background-position:50% 100%}
-            50% {background-position:100% 50%}
-            75% {background-position:50% 0%}
-            100% {background-position:0% 50%}
+        @keyframes slide-out {
+            from {
+                transform: translateX(0);
+            }
+            to {
+                transform: translateX(100%);
+            }
         }
-        .main-header {
-            text-shadow: 0 2px 16px rgba(255,71,87,0.08);
-            letter-spacing: 2px;
+        .animate-slide-out {
+            animation: slide-out 0.25s cubic-bezier(.4, 0, .2, 1);
         }
-        .main-subtitle {
-            color: #ff4757;
-            opacity: 0.85;
-        }
-        .card-date {
-            font-size: 0.95rem;
-            color: #b0b0b0;
-        }
-        /* 优化动画 */
-        @keyframes fade-in {
-            from { opacity: 0; transform: translateY(30px);}
-            to { opacity: 1; transform: translateY(0);}
-        }
-        .animate-fade-in { animation: fade-in 1s cubic-bezier(.4,0,.2,1);}
-        @keyframes fade-in-up {
-            from { opacity: 0; transform: translateY(40px);}
-            to { opacity: 1; transform: translateY(0);}
-        }
-        .animate-fade-in-up { animation: fade-in-up 0.8s cubic-bezier(.4,0,.2,1);}
-        .delay-100 { animation-delay: 0.15s;}
-        .delay-200 { animation-delay: 0.3s;}
     </style>
 </head>
 
-<body>
-    <div id="nav-placeholder" style="position:fixed;top:0;left:0;width:100%;z-index:1000;"></div>
-    <div class="container mx-auto px-4 py-16" style="padding-top:90px;">
-        <header class="text-center mb-14 animate-fade-in">
-            <h1 class="text-6xl font-extrabold text-red-800 mb-5 main-header">纸盒人的网站</h1>
-            <p class="text-2xl main-subtitle">欢迎来到我的个人空间</p>
-        </header>
-        <div class="text-center mb-10 animate-fade-in-up">
-            <h2 class="text-2xl font-semibold text-red-800">当前时间：<span id="time" class="text-red-700 font-mono"></span>
-            </h2>
+<body class="bg-light font-sans text-dark min-h-screen flex flex-col">
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold gradient-text">纸盒人</a>
+            <div id="nav-menu" class="hidden md:flex space-x-8">
+                <a href="#" class="text-primary hover:text-secondary font-medium">首页</a>
+                <a href="#tools" class="text-gray-600 hover:text-primary font-medium">工具</a>
+                <a href="about.html" class="text-gray-600 hover:text-primary font-medium">关于</a>
+                <a href="#contact" class="text-gray-600 hover:text-primary font-medium">联系</a>
+                <a href="home.html" class="text-gray-600 hover:text-primary font-medium">对话</a>
+            </div>
+            <button id="mobileMenuButton" class="md:hidden text-gray-600 focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </nav>
+        <!-- 移动端弹出菜单 -->
+        <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-40 z-50 hidden">
+            <div class="absolute top-0 right-0 w-2/3 max-w-xs bg-white h-full shadow-lg flex flex-col py-8 px-6 animate-slide-in">
+                <button id="closeMobileMenu" class="self-end mb-6 text-gray-600 text-2xl focus:outline-none">
+                    <i class="fas fa-times"></i>
+                </button>
+                <a href="#" class="block py-2 px-2 text-primary font-bold text-lg mb-2">首页</a>
+                <a href="#tools" class="block py-2 px-2 text-gray-700 hover:text-primary mb-2">工具</a>
+                <a href="about.html" class="block py-2 px-2 text-gray-700 hover:text-primary mb-2">关于</a>
+                <a href="#contact" class="block py-2 px-2 text-gray-700 hover:text-primary mb-2">联系</a>
+                <a href="home.html" class="block py-2 px-2 text-gray-700 hover:text-primary">对话</a>
+            </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            <article class="glass p-8 shadow-xl transition-transform transform hover:scale-105 animate-fade-in-up">
-                <h2 class="text-2xl font-semibold text-red-800 mb-3">瞎写的编码解析</h2>
-                <a href="parse.html"
-                    class="glass-btn inline-block px-8 py-2 mt-2 text-lg font-medium">跳转</a>
-                <div class="card-date" id="date1"></div>
-            </article>
-            <article class="glass p-8 shadow-xl transition-transform transform hover:scale-105 animate-fade-in-up delay-100">
-                <h2 class="text-2xl font-semibold text-red-800 mb-3">Excel复制功能</h2>
-                <a href="Excel.html"
-                    class="glass-btn inline-block px-8 py-2 mt-2 text-lg font-medium">跳转</a>
-                <div class="card-date" id="date2"></div>
-            </article>
-            <article class="glass p-8 shadow-xl transition-transform transform hover:scale-105 animate-fade-in-up delay-200">
-                <h2 class="text-2xl font-semibold text-red-800 mb-3">今天吃什么</h2>
-                <a href="FortuneTeller.html"
-                    class="glass-btn inline-block px-8 py-2 mt-2 text-lg font-medium">跳转</a>
-                <div class="card-date" id="date3"></div>
-            </article>
-            <article class="glass p-8 shadow-xl transition-transform transform hover:scale-105 animate-fade-in-up delay-200">
-                <h2 class="text-2xl font-semibold text-red-800 mb-3">Web的3D</h2>
-                <a href="new3D.html"
-                    class="glass-btn inline-block px-8 py-2 mt-2 text-lg font-medium">跳转</a>
-                <div class="card-date" id="date4"></div>
-            </article>
+    </header>
+    <main class="flex-grow">
+        <section class="py-20 px-6">
+            <div class="container mx-auto max-w-4xl text-center">
+                <h1 class="text-4xl md:text-5xl font-bold mb-6">你好，欢迎来到 <span class="gradient-text">纸盒人的网站</span>
+                </h1>
+                <p class="text-xl text-gray-600 mb-8">分享工具、代码与生活点滴</p>
+                <div class="flex justify-center space-x-4">
+                    <a href="#tools"
+                        class="bg-primary hover:bg-secondary text-white px-6 py-3 rounded-full font-medium transition duration-300">探索工具</a>
+                    <a href="about.html"
+                        class="border-2 border-primary text-primary hover:bg-primary hover:text-white px-6 py-3 rounded-full font-medium transition duration-300">关于我</a>
+                    <a href="#contact"
+                        class="border-2 border-accent text-accent hover:bg-accent hover:text-white px-6 py-3 rounded-full font-medium transition duration-300">联系我</a>
+                    <a href="home.html"
+                        class="border-2 border-secondary text-secondary hover:bg-secondary hover:text-white px-6 py-3 rounded-full font-medium transition duration-300">对话</a>
+                </div>
+            </div>
+        </section>
+        <section id="tools" class="py-16 px-6 bg-white">
+            <div class="container mx-auto max-w-5xl">
+                <h2 class="text-3xl font-bold mb-12 text-center">精选工具</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <article class="bg-gray-50 rounded-xl shadow-md p-8 flex flex-col items-start">
+                        <h3 class="text-2xl font-semibold text-primary mb-3">瞎写的编码解析</h3>
+                        <a href="parse.html"
+                            class="bg-primary hover:bg-secondary text-white px-6 py-2 rounded-full font-medium transition duration-300 mt-2">跳转</a>
+                        <div class="text-sm text-gray-400 mt-4" id="date1"></div>
+                    </article>
+                    <article class="bg-gray-50 rounded-xl shadow-md p-8 flex flex-col items-start">
+                        <h3 class="text-2xl font-semibold text-primary mb-3">Excel复制功能</h3>
+                        <a href="Excel.html"
+                            class="bg-primary hover:bg-secondary text-white px-6 py-2 rounded-full font-medium transition duration-300 mt-2">跳转</a>
+                        <div class="text-sm text-gray-400 mt-4" id="date2"></div>
+                    </article>
+                    <article class="bg-gray-50 rounded-xl shadow-md p-8 flex flex-col items-start">
+                        <h3 class="text-2xl font-semibold text-primary mb-3">今天吃什么</h3>
+                        <a href="FortuneTeller.html"
+                            class="bg-primary hover:bg-secondary text-white px-6 py-2 rounded-full font-medium transition duration-300 mt-2">跳转</a>
+                        <div class="text-sm text-gray-400 mt-4" id="date3"></div>
+                    </article>
+                    <article class="bg-gray-50 rounded-xl shadow-md p-8 flex flex-col items-start">
+                        <h3 class="text-2xl font-semibold text-primary mb-3">Web的3D</h3>
+                        <a href="new3D.html"
+                            class="bg-primary hover:bg-secondary text-white px-6 py-2 rounded-full font-medium transition duration-300 mt-2">跳转</a>
+                        <div class="text-sm text-gray-400 mt-4" id="date4"></div>
+                    </article>
+                </div>
+            </div>
+        </section>
+        <section id="about" class="py-16 px-6 bg-gray-50">
+            <div class="container mx-auto max-w-4xl">
+                <h2 class="text-3xl font-bold mb-12 text-center">关于我</h2>
+                <div class="flex flex-col md:flex-row items-center gap-8">
+                    <div class="w-full md:w-1/3">
+                        <img src="https://picsum.photos/400?random=2" alt="纸盒人头像"
+                            class="rounded-full w-64 h-64 object-cover mx-auto shadow-lg" loading="lazy">
+                    </div>
+                    <div class="w-full md:w-2/3">
+                        <p class="text-lg mb-4">我是纸盒人，一名热爱编程与分享的开发者。</p>
+                        <p class="text-lg mb-4">喜欢用代码解决实际问题，也喜欢探索各种有趣的工具和技术。</p>
+                        <p class="text-lg mb-6">业余时间喜欢阅读、旅行和尝试新鲜事物。</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-gray-100 px-3 py-1 rounded-full text-sm font-medium">JavaScript</span>
+                            <span class="bg-gray-100 px-3 py-1 rounded-full text-sm font-medium">前端开发</span>
+                            <span class="bg-gray-100 px-3 py-1 rounded-full text-sm font-medium">工具制作</span>
+                            <span class="bg-gray-100 px-3 py-1 rounded-full text-sm font-medium">生活分享</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="contact" class="py-16 px-6 bg-white">
+            <div class="container mx-auto max-w-2xl">
+                <h2 class="text-3xl font-bold mb-12 text-center">联系我</h2>
+                <div class="flex justify-center space-x-4 mb-6">
+                    <button onclick="showSteamDialog()"
+                        class="p-3 bg-gray-800 text-white rounded hover:bg-gray-700 transition">
+                        <i class="fab fa-steam"></i> Steam
+                    </button>
+                    <button onclick="showEmailDialog()"
+                        class="p-3 bg-primary text-white rounded hover:bg-secondary transition">
+                        <i class="fas fa-envelope"></i> 邮箱
+                    </button>
+                </div>
+                <div class="bg-white rounded-lg p-6 shadow-md mt-8">
+                    <h3 class="text-2xl font-bold text-primary mb-4">其他联系方式</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="text-xl font-semibold text-primary mb-2">Call Me</h4>
+                            <p class="text-gray-600">我干死他</p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="text-xl font-semibold text-primary mb-2">我是个彩笔</h4>
+                            <p class="text-gray-600">求指教</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="py-8 px-6 bg-white">
+            <div class="container mx-auto max-w-2xl text-center">
+                <h2 class="text-2xl font-semibold text-primary mb-2">当前时间</h2>
+                <span id="time" class="text-3xl font-mono text-secondary"></span>
+            </div>
+        </section>
+    </main>
+    <footer class="bg-dark text-white py-8 px-6">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2025 纸盒人. 保留所有权利.</p>
+            <p class="mt-2 text-gray-400">Built with passion and ☕</p>
         </div>
-    </div>
+    </footer>
+
     <script>
-        // 动态加载 nav.html
-        fetch('nav.html')
-            .then(res => res.text())
-            .then(html => {
-                document.getElementById('nav-placeholder').innerHTML = html;
-            });
         const today = new Date();
         const formattedDate = today.toISOString().split('T')[0];
         document.getElementById('date1').textContent = formattedDate;
@@ -122,6 +220,105 @@
         }
         setInterval(updateTime, 1000);
         updateTime();
+        function showSteamDialog() {
+            const steamUrl = "https://steamcommunity.com/profiles/76561198965005221/";
+            const dialogContent = `
+        <div class="p-4">
+            <h3 class="text-lg font-bold mb-2">我的Steam主页</h3>
+            <p class="mb-4">点击下方按钮访问我的Steam主页：</p>
+            <a href="${steamUrl}" target="_blank" 
+               class="w-full p-3 bg-gray-800 text-white rounded hover:bg-gray-700 text-center block">
+                <i class="fab fa-steam"></i> 访问Steam主页
+            </a>
+        </div>`;
+            showDialog(dialogContent);
+        }
+        function showEmailDialog() {
+            const email = "whj1008611@gmail.com";
+            const dialogContent = `
+        <div class="p-4">
+            <h3 class="text-lg font-bold mb-2">我的邮箱</h3>
+            <p class="mb-4">我的联系邮箱是：</p>
+            <div class="bg-gray-100 p-3 rounded mb-4">
+                <span class="font-mono">${email}</span>
+            </div>
+            <button onclick="copyEmail('${email}')" 
+                    class="w-full p-3 bg-primary text-white rounded hover:bg-secondary">
+                复制邮箱地址
+            </button>
+        </div>`;
+            showDialog(dialogContent);
+        }
+        function showDialog(content) {
+            const dialog = document.createElement('div');
+            dialog.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300 z-50';
+            dialog.innerHTML = `
+        <div class="bg-white rounded-lg w-full max-w-md transform transition-all duration-300 scale-95 opacity-0">
+            ${content}
+            <div class="p-4 border-t">
+                <button onclick="this.parentElement.parentElement.parentElement.remove()" 
+                        class="w-full p-2 bg-gray-200 rounded hover:bg-gray-300">
+                    关闭
+                </button>
+            </div>
+        </div>`;
+            document.body.appendChild(dialog);
+            setTimeout(() => {
+                dialog.classList.remove('opacity-0');
+                dialog.querySelector('div').classList.remove('scale-95', 'opacity-0');
+                dialog.querySelector('div').classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+        function copyEmail(email) {
+            navigator.clipboard.writeText(email).then(() => {
+                showToast('邮箱地址已复制到剪贴板');
+            });
+        }
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 p-4 bg-green-500 text-white rounded-lg shadow-lg transform transition-all duration-300 ease-out opacity-0 translate-y-4 z-50';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('opacity-0', 'translate-y-4');
+                toast.classList.add('opacity-100', 'translate-y-0');
+            }, 10);
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-4');
+            }, 3000);
+            setTimeout(() => {
+                toast.remove();
+            }, 3300);
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            const mobileMenuButton = document.getElementById('mobileMenuButton');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const closeMobileMenu = document.getElementById('closeMobileMenu');
+            const menuPanel = mobileMenu?.querySelector('div.animate-slide-in');
+            if (mobileMenuButton && mobileMenu && closeMobileMenu && menuPanel) {
+                mobileMenuButton.addEventListener('click', () => {
+                    menuPanel.classList.remove('animate-slide-out');
+                    menuPanel.classList.add('animate-slide-in');
+                    mobileMenu.classList.remove('hidden');
+                });
+                function closeMenuWithAnimation() {
+                    menuPanel.classList.remove('animate-slide-in');
+                    menuPanel.classList.add('animate-slide-out');
+                    menuPanel.addEventListener('animationend', function handler() {
+                        mobileMenu.classList.add('hidden');
+                        menuPanel.classList.remove('animate-slide-out');
+                        menuPanel.removeEventListener('animationend', handler);
+                    });
+                }
+                closeMobileMenu.addEventListener('click', closeMenuWithAnimation);
+                mobileMenu.addEventListener('click', (e) => {
+                    if (e.target === mobileMenu) {
+                        closeMenuWithAnimation();
+                    }
+                });
+            }
+        });
     </script>
 </body>
 

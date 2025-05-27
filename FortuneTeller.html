@@ -5,107 +5,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>吃啥 - 纸盒人的网站</title>
+    <meta name="description" content="纸盒人的网站 - 今天吃什么">
     <link rel="icon" href="./博客.png" type="image/png">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="./css/animations.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3B82F6",
+                        secondary: "#1E40AF",
+                        accent: "#10B981",
+                        dark: "#1F2937",
+                        light: "#F9FAFB"
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body {
-            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
-            /* 动态渐变背景 */
-            background: linear-gradient(120deg, #ff6a00, #ee0979, #00c3ff, #92fe9d, #f7971e, #ffd200, #f953c6, #b91d73);
-            background-size: 1600% 1600%;
-            animation: gradientBG 18s ease infinite;
-            min-height: 100vh;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
 
-        body::-webkit-scrollbar {
-            display: none;
-        }
-
-        html,
-        body {
-            overflow: auto;
-            height: 100%;
-        }
-
-        @keyframes gradientBG {
-            0% {
-                background-position: 0% 50%
-            }
-
-            25% {
-                background-position: 50% 100%
-            }
-
-            50% {
-                background-position: 100% 50%
-            }
-
-            75% {
-                background-position: 50% 0%
-            }
-
-            100% {
-                background-position: 0% 50%
-            }
-        }
-
-        .main-header {
-            text-shadow: 0 2px 16px rgba(255, 71, 87, 0.08);
-            letter-spacing: 2px;
-        }
-
-        .main-subtitle {
-            color: #ff4757;
-            opacity: 0.85;
-        }
-
-        .card-date {
-            font-size: 0.95rem;
-            color: #b0b0b0;
-        }
-
-        /* 优化动画 */
-        @keyframes fade-in {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .animate-fade-in {
-            animation: fade-in 1s cubic-bezier(.4, 0, .2, 1);
-        }
-
-        @keyframes fade-in-up {
-            from {
-                opacity: 0;
-                transform: translateY(40px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .animate-fade-in-up {
-            animation: fade-in-up 0.8s cubic-bezier(.4, 0, .2, 1);
-        }
-
-        .delay-100 {
-            animation-delay: 0.15s;
-        }
-
-        .delay-200 {
-            animation-delay: 0.3s;
+        .gradient-text {
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, #3B82F6, #10B981);
         }
 
         .food-item {
@@ -115,6 +45,7 @@
             color: rgba(255, 69, 0, 0.9);
             animation: fadeMove 1.8s ease-in-out forwards;
             white-space: nowrap;
+            z-index: 50;
         }
 
         @keyframes fadeMove {
@@ -132,13 +63,6 @@
                 opacity: 0;
                 transform: translateY(-50px) scale(1.2) rotate(-10deg);
             }
-        }
-
-        #foodContainer {
-            position: relative;
-            width: 100%;
-            overflow: hidden;
-            border-radius: 12px;
         }
 
         .modal {
@@ -182,94 +106,6 @@
             visibility: visible;
         }
 
-        .modal h2 {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 16px;
-            text-align: center;
-            color: #333;
-        }
-
-        .modal ul {
-            max-height: 200px;
-            overflow-y: auto;
-            margin-bottom: 16px;
-            padding: 0;
-            list-style: none;
-        }
-
-        .modal ul li {
-            padding: 8px 12px;
-            background: #fff;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            font-size: 0.9rem;
-            color: #555;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal ul li button {
-            background-color: #f44336;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 4px 8px;
-            font-size: 0.8rem;
-            cursor: pointer;
-        }
-
-        .modal ul li button:hover {
-            background-color: #e53935;
-        }
-
-        .modal ul li:last-child {
-            margin-bottom: 0;
-        }
-
-        .modal .input-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .modal input {
-            flex: 1;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 8px;
-            font-size: 0.9rem;
-        }
-
-        .modal button {
-            padding: 8px 12px;
-            background-color: #4caf50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        .modal button:hover {
-            background-color: #45a049;
-        }
-
-        .modal .close-button {
-            background-color: #f44336;
-        }
-
-        .modal .close-button:hover {
-            background-color: #e53935;
-        }
-
-        .disabled {
-            background-color: #ccc !important;
-            cursor: not-allowed !important;
-        }
-
         .tooltip {
             position: absolute;
             top: -30px;
@@ -284,57 +120,146 @@
             display: none;
         }
 
-        .menu-button-container {
-            position: relative;
-        }
-
         .menu-button-container:hover .tooltip {
             display: block;
+        }
+
+        .disabled {
+            background-color: #ccc !important;
+            cursor: not-allowed !important;
+        }
+
+        @keyframes slide-in {
+            from {
+                transform: translateX(100%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .animate-slide-in {
+            animation: slide-in 0.25s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        @keyframes slide-out {
+            from {
+                transform: translateX(0);
+            }
+
+            to {
+                transform: translateX(100%);
+            }
+        }
+
+        .animate-slide-out {
+            animation: slide-out 0.25s cubic-bezier(.4, 0, .2, 1);
         }
     </style>
 </head>
 
-<body>
-    <div id="nav-placeholder" style="position:fixed;top:0;left:0;width:100%;z-index:1000;"></div>
-    <div class="container mx-auto px-4 py-12 text-center relative" style="margin-top:90px;">
-        <h1 id="result" class="text-2xl font-bold mb-6">今天吃啥呀？</h1>
-        <div class="flex justify-center space-x-4">
-            <button id="startButton"
-                class="px-6 py-3 font-medium text-white bg-red-600 rounded-lg shadow-md hover:bg-red-700 transition-all duration-300">
-                开始
+<body class="bg-light font-sans text-dark min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold gradient-text">纸盒人</a>
+            <div class="hidden md:flex space-x-8">
+                <a href="index.html" class="text-primary hover:text-secondary font-medium">首页</a>
+                <a href="index.html#tools" class="text-gray-600 hover:text-primary font-medium">工具</a>
+                <a href="about.html" class="text-gray-600 hover:text-primary font-medium">关于</a>
+                <a href="index.html#contact" class="text-gray-600 hover:text-primary font-medium">联系</a>
+                <a href="home.html" class="text-gray-600 hover:text-primary font-medium">对话</a>
+            </div>
+            <!-- 移动端菜单按钮 -->
+            <button id="mobileMenuButton" class="md:hidden text-gray-600 focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
             </button>
-            <div class="menu-button-container">
-                <button id="menuButton"
-                    class="px-6 py-3 font-medium text-white bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 transition-all duration-300">
-                    菜单
+        </nav>
+        <!-- 移动端弹出菜单 -->
+        <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-40 z-50 hidden">
+            <div
+                class="absolute top-0 right-0 w-2/3 max-w-xs bg-white h-full shadow-lg flex flex-col py-8 px-6 animate-slide-in">
+                <button id="closeMobileMenu" class="self-end mb-6 text-gray-600 text-2xl focus:outline-none">
+                    <i class="fas fa-times"></i>
                 </button>
-                <div class="tooltip">请先停止随机展示</div>
+                <a href="index.html" class="block py-2 px-2 text-primary font-bold text-lg mb-2">首页</a>
+                <a href="index.html#tools" class="block py-2 px-2 text-gray-700 hover:text-primary mb-2">工具</a>
+                <a href="about.html" class="block py-2 px-2 text-gray-700 hover:text-primary mb-2">关于</a>
+                <a href="index.html#contact" class="block py-2 px-2 text-gray-700 hover:text-primary mb-2">联系</a>
+                <a href="home.html" class="block py-2 px-2 text-gray-700 hover:text-primary">对话</a>
             </div>
         </div>
-        <div id="foodContainer" class="relative w-full h-96 overflow-hidden mt-6"></div>
-    </div>
+        <style>
+            @keyframes slide-in {
+                from {
+                    transform: translateX(100%);
+                }
 
-    <!-- Modal -->
+                to {
+                    transform: translateX(0);
+                }
+            }
+
+            .animate-slide-in {
+                animation: slide-in 0.25s cubic-bezier(.4, 0, .2, 1);
+            }
+
+            @keyframes slide-out {
+                from {
+                    transform: translateX(0);
+                }
+
+                to {
+                    transform: translateX(100%);
+                }
+            }
+
+            .animate-slide-out {
+                animation: slide-out 0.25s cubic-bezier(.4, 0, .2, 1);
+            }
+        </style>
+    </header>
+    <main class="flex-grow">
+        <section class="py-20 px-6">
+            <div class="container mx-auto max-w-xl text-center">
+                <h1 id="result" class="text-3xl font-bold mb-8">今天吃啥呀？</h1>
+                <div class="flex justify-center space-x-4 mb-8">
+                    <button id="startButton"
+                        class="px-8 py-3 font-medium text-white bg-primary rounded-full shadow-md hover:bg-secondary transition-all duration-300">
+                        开始
+                    </button>
+                    <div class="menu-button-container relative">
+                        <button id="menuButton"
+                            class="px-8 py-3 font-medium text-white bg-accent rounded-full shadow-md hover:bg-green-700 transition-all duration-300">
+                            菜单
+                        </button>
+                        <div class="tooltip">请先停止随机展示</div>
+                    </div>
+                </div>
+                <div id="foodContainer" class="relative w-full h-96 overflow-hidden mt-6"></div>
+            </div>
+        </section>
+    </main>
     <div class="modal-overlay" id="modalOverlay"></div>
     <div class="modal" id="menuModal">
-        <h2>菜单列表</h2>
-        <ul id="menuList">
-            <!-- 菜单项将动态插入 -->
-        </ul>
-        <div class="input-group">
-            <input type="text" id="newFoodInput" placeholder="新增菜品">
-            <button id="addFoodButton">新增</button>
+        <h2 class="text-xl font-bold mb-4 text-center">菜单列表</h2>
+        <ul id="menuList" class="mb-4"></ul>
+        <div class="flex gap-2 mb-4">
+            <input type="text" id="newFoodInput" placeholder="新增菜品" class="flex-1 border rounded-lg px-3 py-2">
+            <button id="addFoodButton" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary">新增</button>
         </div>
-        <button id="closeModalButton" class="close-button mt-4">关闭</button>
+        <button id="closeModalButton"
+            class="close-button w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700">关闭</button>
     </div>
-
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-8 px-6">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2025 纸盒人. 保留所有权利.</p>
+            <p class="mt-2 text-gray-400">Built with passion and ☕</p>
+        </div>
+    </footer>
     <script>
-        // 动态加载 nav.html
-        fetch('nav.html')
-            .then(res => res.text())
-            .then(html => {
-                document.getElementById('nav-placeholder').innerHTML = html;
-            });
         const foodOptions = [
             "馄饨", "烩面", "热干面", "刀削面", "油泼面", "炸酱面", "炒面", "重庆小面", "米线", "酸辣粉", "土豆粉", "螺狮粉", "凉皮儿",
             "麻辣烫", "肉夹馍", "羊肉泡馍", "炒饭", "盖浇饭", "烤肉饭", "黄焖鸡米饭", "麻辣香锅", "火锅", "酸菜鱼", "烤串", "披萨",
@@ -360,8 +285,8 @@
             const foodItem = document.createElement('div');
             foodItem.textContent = food;
             foodItem.className = 'food-item';
-            foodItem.style.left = `${Math.random() * 100}%`;
-            foodItem.style.top = `${Math.random() * 100}%`;
+            foodItem.style.left = `${Math.random() * 80 + 10}%`;
+            foodItem.style.top = `${Math.random() * 80 + 10}%`;
             foodItem.style.color = `hsl(${Math.random() * 360}, 70%, 50%)`;
             document.body.appendChild(foodItem);
 
@@ -374,10 +299,12 @@
             menuList.innerHTML = '';
             foodOptions.forEach((food, index) => {
                 const li = document.createElement('li');
+                li.className = "flex justify-between items-center bg-white rounded px-3 py-2 mb-2 shadow";
                 li.textContent = food;
 
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = '删除';
+                deleteButton.className = "bg-red-100 text-red-600 px-2 py-1 rounded hover:bg-red-200 ml-2";
                 deleteButton.addEventListener('click', () => {
                     foodOptions.splice(index, 1);
                     updateMenuList();
@@ -456,6 +383,35 @@
         modalOverlay.addEventListener('click', () => {
             modalOverlay.classList.remove('show');
             menuModal.classList.remove('show');
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            const mobileMenuButton = document.getElementById('mobileMenuButton');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const closeMobileMenu = document.getElementById('closeMobileMenu');
+            const menuPanel = mobileMenu?.querySelector('div.animate-slide-in');
+            if (mobileMenuButton && mobileMenu && closeMobileMenu && menuPanel) {
+                mobileMenuButton.addEventListener('click', () => {
+                    menuPanel.classList.remove('animate-slide-out');
+                    menuPanel.classList.add('animate-slide-in');
+                    mobileMenu.classList.remove('hidden');
+                });
+                function closeMenuWithAnimation() {
+                    menuPanel.classList.remove('animate-slide-in');
+                    menuPanel.classList.add('animate-slide-out');
+                    menuPanel.addEventListener('animationend', function handler() {
+                        mobileMenu.classList.add('hidden');
+                        menuPanel.classList.remove('animate-slide-out');
+                        menuPanel.removeEventListener('animationend', handler);
+                    });
+                }
+                closeMobileMenu.addEventListener('click', closeMenuWithAnimation);
+                // 点击遮罩关闭
+                mobileMenu.addEventListener('click', (e) => {
+                    if (e.target === mobileMenu) {
+                        closeMenuWithAnimation();
+                    }
+                });
+            }
         });
     </script>
 </body>

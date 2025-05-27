@@ -5,155 +5,244 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>对话 - 纸盒人的网站</title>
+    <meta name="description" content="纸盒人的网站 - 对话">
     <link rel="icon" href="./博客.png" type="image/png">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3B82F6",
+                        secondary: "#1E40AF",
+                        accent: "#10B981",
+                        dark: "#1F2937",
+                        light: "#F9FAFB"
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body {
-            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
-            background: linear-gradient(120deg, #ff6a00, #ee0979, #00c3ff, #92fe9d, #f7971e, #ffd200, #f953c6, #b91d73);
-            background-size: 1600% 1600%;
-            animation: gradientBG 18s ease infinite;
-            min-height: 100vh;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+
+        .gradient-text {
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, #3B82F6, #10B981);
         }
-        body::-webkit-scrollbar {
-            display: none;
-        }
-        html, body {
-            overflow: auto;
-            height: 100%;
-        }
-        @keyframes gradientBG {
-            0% {background-position:0% 50%}
-            25% {background-position:50% 100%}
-            50% {background-position:100% 50%}
-            75% {background-position:50% 0%}
-            100% {background-position:0% 50%}
-        }
-        .main-header {
-            text-shadow: 0 2px 16px rgba(255,71,87,0.08);
-            letter-spacing: 2px;
-        }
-        .main-subtitle {
-            color: #ff4757;
-            opacity: 0.85;
-        }
-        .card-date {
-            font-size: 0.95rem;
-            color: #b0b0b0;
-        }
-        @keyframes fade-in {
-            from { opacity: 0; transform: translateY(30px);}
-            to { opacity: 1; transform: translateY(0);}
-        }
-        .animate-fade-in { animation: fade-in 1s cubic-bezier(.4,0,.2,1);}
-        @keyframes fade-in-up {
-            from { opacity: 0; transform: translateY(40px);}
-            to { opacity: 1; transform: translateY(0);}
-        }
-        .animate-fade-in-up { animation: fade-in-up 0.8s cubic-bezier(.4,0,.2,1);}
-        .delay-100 { animation-delay: 0.15s;}
-        .delay-200 { animation-delay: 0.3s;}
-        /* 聊天相关样式 */
-        .chat-container {
-            height: 100%;
+
+        /* 聊天样式适配首页风格，左右对答 */
+        .chat-area {
             display: flex;
             flex-direction: column;
-        }
-        .message-list {
-            flex: 1;
+            height: 500px;
+            max-height: 60vh;
             overflow-y: auto;
-            padding: 15px;
+            gap: 24px;
+            padding: 24px 0;
         }
-        .input-area {
-            padding: 12px;
-            background: #f8f8f8;
-            border-top: 1px solid #ddd;
+
+        .chat-row {
             display: flex;
-            gap: 10px;
-            position: sticky;
-            bottom: 0;
+            align-items: flex-end;
+            width: 100%;
         }
-        .message-item {
+
+        .chat-row.user {
+            flex-direction: row-reverse;
+        }
+
+        .chat-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #e5e7eb;
             display: flex;
-            margin-bottom: 15px;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 12px;
+            flex-shrink: 0;
         }
-        .message-item.sent {
-            justify-content: flex-end;
+
+        .chat-bubble {
+            max-width: 60%;
+            min-width: 80px;
+            font-size: 1.1rem;
+            padding: 18px 22px;
+            border-radius: 1.5rem 1.5rem 1.5rem 0.5rem;
+            box-shadow: 0 2px 8px 0 rgba(60, 60, 60, 0.06);
+            word-break: break-word;
         }
-        .message-bubble {
-            max-width: 70%;
-            padding: 10px 15px;
-            border-radius: 5px;
-            position: relative;
-            font-size: 16px;
-            line-height: 1.4;
+
+        .chat-row.user .chat-bubble {
+            background: #3B82F6;
+            color: #fff;
+            border-radius: 1.5rem 1.5rem 0.5rem 1.5rem;
+            margin-left: 0;
+            margin-right: 0;
         }
-        .received .message-bubble {
-            background: #fff;
-            border-radius: 0 15px 15px 15px;
+
+        .chat-row.ai .chat-bubble {
+            background: #f3f4f6;
+            color: #222;
+            border-radius: 1.5rem 1.5rem 1.5rem 0.5rem;
+            margin-left: 0;
+            margin-right: 0;
         }
-        .sent .message-bubble {
-            background: #95ec69;
-            border-radius: 15px 0 15px 15px;
+
+        .chat-timestamp {
+            font-size: 0.85rem;
+            color: #aaa;
+            margin: 0 8px;
+            margin-top: 6px;
         }
-        .timestamp {
-            font-size: 12px;
-            color: #888;
-            margin-top: 5px;
-        }
-        .message-input {
-            flex: 1;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            resize: none;
-            max-height: 100px;
-            font-size: 16px;
-            outline: none;
-            background: #fff;
-        }
-        .send-button {
-            background: #07c160;
-            color: white;
+
+        .refresh-button {
+            margin-left: 10px;
+            background: #f3f4f6;
             border: none;
-            padding: 0 20px;
-            border-radius: 5px;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 18px;
+            color: #3B82F6;
+            transition: background 0.2s;
+        }
+
+        .refresh-button:hover {
+            background: #e0e7ef;
+        }
+
+        @keyframes slide-in {
+            from {
+                transform: translateX(100%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .animate-slide-in {
+            animation: slide-in 0.25s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        @keyframes slide-out {
+            from {
+                transform: translateX(0);
+            }
+
+            to {
+                transform: translateX(100%);
+            }
+        }
+
+        .animate-slide-out {
+            animation: slide-out 0.25s cubic-bezier(.4, 0, .2, 1);
         }
     </style>
 </head>
 
-<body>
-    <div id="nav-placeholder" style="position:fixed;top:0;left:0;width:100%;z-index:1000;"></div>
-    <div class="chat-container" style="padding-top:90px;">
-        <div class="message-list" id="messageList">
-            <div class="message-item received">
-                <div class="message-bubble">
-                    有什么相对我说的吗
-                    <div class="timestamp text-gray-500">刚刚</div>
-                </div>
+<body class="bg-light font-sans text-dark min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold gradient-text">纸盒人</a>
+            <div id="nav-menu" class="hidden md:flex space-x-8">
+                <a href="index.html" class="text-primary hover:text-secondary font-medium">首页</a>
+                <a href="index.html#tools" class="text-gray-600 hover:text-primary font-medium">工具</a>
+                <a href="about.html" class="text-gray-600 hover:text-primary font-medium">关于</a>
+                <a href="index.html#contact" class="text-gray-600 hover:text-primary font-medium">联系</a>
+                <a href="home.html" class="text-gray-600 hover:text-primary font-medium">对话</a>
+            </div>
+            <button id="mobileMenuButton" class="md:hidden text-gray-600 focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </nav>
+        <!-- 移动端弹出菜单 -->
+        <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-40 z-50 hidden">
+            <div class="absolute top-0 right-0 w-2/3 max-w-xs bg-white h-full shadow-lg flex flex-col py-8 px-6 animate-slide-in">
+                <button id="closeMobileMenu" class="self-end mb-6 text-gray-600 text-2xl focus:outline-none">
+                    <i class="fas fa-times"></i>
+                </button>
+                <a href="index.html" class="block py-2 px-2 text-primary font-bold text-lg mb-2">首页</a>
+                <a href="index.html#tools" class="block py-2 px-2 text-gray-700 hover:text-primary mb-2">工具</a>
+                <a href="about.html" class="block py-2 px-2 text-gray-700 hover:text-primary mb-2">关于</a>
+                <a href="index.html#contact" class="block py-2 px-2 text-gray-700 hover:text-primary mb-2">联系</a>
+                <a href="home.html" class="block py-2 px-2 text-gray-700 hover:text-primary">对话</a>
             </div>
         </div>
-        <div class="input-area">
-            <textarea id="messageContent" class="message-input" rows="1" placeholder="输入消息..."
-                oninput="this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'"></textarea>
-            <button id="submitBtn" class="send-button">发送</button>
+    </header>
+    <main class="flex-grow">
+        <section class="py-20 px-6">
+            <div class="container mx-auto max-w-3xl">
+                <h1 class="text-4xl md:text-5xl font-bold mb-6 text-center">与<span class="gradient-text">纸盒人</span>对话
+                </h1>
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <div id="messageList" class="chat-area">
+                    </div>
+                    <div class="flex gap-2 mt-6">
+                        <textarea id="messageContent"
+                            class="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary resize-none"
+                            rows="1" placeholder="输入消息..."
+                            oninput="this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'"></textarea>
+                        <button id="submitBtn"
+                            class="bg-primary hover:bg-secondary text-white px-4 py-2 rounded-lg transition duration-300">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="bg-dark text-white py-8 px-6">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2025 纸盒人. 保留所有权利.</p>
+            <p class="mt-2 text-gray-400">Built with passion and ☕</p>
         </div>
-    </div>
-    <script>
-        // 动态加载 nav.html
-        fetch('nav.html')
-            .then(res => res.text())
-            .then(html => {
-                document.getElementById('nav-placeholder').innerHTML = html;
-            });
-        // ...existing code for chat...
-    </script>
+    </footer>
     <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const mobileMenuButton = document.getElementById('mobileMenuButton');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const closeMobileMenu = document.getElementById('closeMobileMenu');
+            const menuPanel = mobileMenu?.querySelector('div.animate-slide-in');
+            if (mobileMenuButton && mobileMenu && closeMobileMenu && menuPanel) {
+                mobileMenuButton.addEventListener('click', () => {
+                    menuPanel.classList.remove('animate-slide-out');
+                    menuPanel.classList.add('animate-slide-in');
+                    mobileMenu.classList.remove('hidden');
+                });
+                function closeMenuWithAnimation() {
+                    menuPanel.classList.remove('animate-slide-in');
+                    menuPanel.classList.add('animate-slide-out');
+                    menuPanel.addEventListener('animationend', function handler() {
+                        mobileMenu.classList.add('hidden');
+                        menuPanel.classList.remove('animate-slide-out');
+                        menuPanel.removeEventListener('animationend', handler);
+                    });
+                }
+                closeMobileMenu.addEventListener('click', closeMenuWithAnimation);
+                // 点击遮罩关闭
+                mobileMenu.addEventListener('click', (e) => {
+                    if (e.target === mobileMenu) {
+                        closeMenuWithAnimation();
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>

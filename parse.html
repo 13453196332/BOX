@@ -4,135 +4,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>联系我 - 纸盒人的网站</title>
+    <title>编码解析器 - 纸盒人的网站</title>
+    <meta name="description" content="纸盒人的网站 - 编码解析工具">
     <link rel="icon" href="./博客.png" type="image/png">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/3.2.1/dexie.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3B82F6",
+                        secondary: "#1E40AF",
+                        accent: "#10B981",
+                        dark: "#1F2937",
+                        light: "#F9FAFB"
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body {
-            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
-            /* 动态渐变背景 */
-            background: linear-gradient(120deg, #ff6a00, #ee0979, #00c3ff, #92fe9d, #f7971e, #ffd200, #f953c6, #b91d73);
-            background-size: 1600% 1600%;
-            animation: gradientBG 18s ease infinite;
-            min-height: 100vh;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+
+        .gradient-text {
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, #3B82F6, #10B981);
         }
 
-        body::-webkit-scrollbar {
-            display: none;
-        }
-
-        html,
-        body {
-            overflow: auto;
-            height: 100%;
-        }
-
-        @keyframes gradientBG {
-            0% {
-                background-position: 0% 50%
-            }
-
-            25% {
-                background-position: 50% 100%
-            }
-
-            50% {
-                background-position: 100% 50%
-            }
-
-            75% {
-                background-position: 50% 0%
-            }
-
-            100% {
-                background-position: 0% 50%
-            }
-        }
-
-        .main-header {
-            text-shadow: 0 2px 16px rgba(255, 71, 87, 0.08);
-            letter-spacing: 2px;
-        }
-
-        .main-subtitle {
-            color: #ff4757;
-            opacity: 0.85;
-        }
-
-        .card-date {
-            font-size: 0.95rem;
-            color: #b0b0b0;
-        }
-
-        /* 优化动画 */
-        @keyframes fade-in {
+        @keyframes slide-in {
             from {
-                opacity: 0;
-                transform: translateY(30px);
+                transform: translateX(100%);
             }
 
             to {
-                opacity: 1;
-                transform: translateY(0);
+                transform: translateX(0);
             }
         }
-
-        .animate-fade-in {
-            animation: fade-in 1s cubic-bezier(.4, 0, .2, 1);
-        }
-
-        @keyframes fade-in-up {
+        @keyframes slide-out {
             from {
-                opacity: 0;
-                transform: translateY(40px);
+                transform: translateX(0);
             }
 
             to {
-                opacity: 1;
-                transform: translateY(0);
+                transform: translateX(100%);
             }
         }
-
-        .animate-fade-in-up {
-            animation: fade-in-up 0.8s cubic-bezier(.4, 0, .2, 1);
+        .animate-slide-in {
+            animation: slide-in 0.25s cubic-bezier(.4, 0, .2, 1);
         }
-
-        .delay-100 {
-            animation-delay: 0.15s;
-        }
-
-        .delay-200 {
-            animation-delay: 0.3s;
+        .animate-slide-out {
+            animation: slide-out 0.25s cubic-bezier(.4, 0, .2, 1);
         }
     </style>
 </head>
 
-<body>
-    <div id="nav-placeholder" style="position:fixed;top:0;left:0;width:100%;z-index:1000;"></div>
-    <div class="container mx-auto px-4 py-8">
-        <div class="bg-white rounded-lg p-6 shadow-md" style="margin-top:90px;">
-            <h1 class="text-2xl font-bold text-center text-red-800 mb-6">编码解析器</h1>
-            <div class="relative mb-4">
-                <input type="text" id="codeInput" placeholder="请输入MA编码、AHM编码或GS1编码" class="w-full p-3 border rounded">
-                <button onclick="clearInput()" class="absolute right-4 top-3 text-red-500"
-                    style="background: none; border: none;">✖</button>
+<body class="bg-light font-sans text-dark min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold gradient-text">纸盒人</a>
+            <div class="hidden md:flex space-x-8">
+                <a href="index.html" class="text-primary hover:text-secondary font-medium">首页</a>
+                <a href="index.html#tools" class="text-gray-600 hover:text-primary font-medium">工具</a>
+                <a href="about.html" class="text-gray-600 hover:text-primary font-medium">关于</a>
+                <a href="index.html#contact" class="text-gray-600 hover:text-primary font-medium">联系</a>
+                <a href="home.html" class="text-gray-600 hover:text-primary font-medium">对话</a>
             </div>
-            <button onclick="parseCode()" class="w-full p-3 bg-red-800 text-white rounded hover:bg-red-700">解析</button>
-            <h2 class="text-xl font-bold text-red-800 mb-4">历史记录</h2>
-            <ul id="historyList" class="list-disc pl-5 mb-4">
-                <!-- 历史记录项将动态添加到这里 -->
-                <li class="flex justify-between items-center bg-gray-100 p-2 rounded mb-2">
-                    <span>示例历史记录</span>
-                    <button class="text-red-500 hover:text-red-700">删除</button>
-                </li>
-            </ul>
-            <div id="result" class="mt-4 p-3 bg-red-100 rounded"></div>
-            <div id="error" class="mt-4 text-red-500"></div>
+            <!-- 移动端菜单按钮 -->
+            <button id="mobileMenuButton" class="md:hidden text-gray-600 focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </nav>
+        <!-- 移动端弹出菜单 -->
+        <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-40 z-50 hidden">
+            <div
+                class="absolute top-0 right-0 w-2/3 max-w-xs bg-white h-full shadow-lg flex flex-col py-8 px-6 animate-slide-in"
+                id="mobileMenuPanel">
+                <button id="closeMobileMenu" class="self-end mb-6 text-gray-600 text-2xl focus:outline-none">
+                    <i class="fas fa-times"></i>
+                </button>
+                <a href="index.html" class="block py-2 px-2 text-primary font-bold text-lg mb-2">首页</a>
+                <a href="index.html#tools" class="block py-2 px-2 text-gray-700 hover:text-primary mb-2">工具</a>
+                <a href="about.html" class="block py-2 px-2 text-gray-700 hover:text-primary mb-2">关于</a>
+                <a href="index.html#contact" class="block py-2 px-2 text-gray-700 hover:text-primary mb-2">联系</a>
+                <a href="home.html" class="block py-2 px-2 text-gray-700 hover:text-primary">对话</a>
+            </div>
         </div>
-    </div>
+    </header>
+    <!-- Main Content -->
+    <main class="flex-grow">
+        <section class="py-20 px-6">
+            <div class="container mx-auto max-w-xl">
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <h1 class="text-3xl font-bold text-center gradient-text mb-8">编码解析器</h1>
+                    <div class="relative mb-6">
+                        <input type="text" id="codeInput" placeholder="请输入MA编码、AHM编码或GS1编码"
+                            class="w-full p-4 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary text-lg">
+                        <button onclick="clearInput()" class="absolute right-4 top-4 text-primary"
+                            style="background: none; border: none; font-size: 1.2rem;">✖</button>
+                    </div>
+                    <button onclick="parseCode()"
+                        class="w-full p-3 bg-primary text-white rounded-lg hover:bg-secondary transition mb-8 text-lg font-medium">解析</button>
+                    <h2 class="text-xl font-bold text-primary mb-4">历史记录</h2>
+                    <ul id="historyList" class="mb-4 space-y-2">
+                        <!-- 历史记录项将动态添加到这里 -->
+                    </ul>
+                    <div id="result" class="mt-4 p-4 bg-blue-50 rounded text-base font-mono text-gray-800"></div>
+                    <div id="error" class="mt-4 text-red-500"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-8 px-6">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2025 纸盒人. 保留所有权利.</p>
+            <p class="mt-2 text-gray-400">Built with passion and ☕</p>
+        </div>
+    </footer>
     <script>
         const db = new Dexie('CodeHistoryDB');
         db.version(1).stores({
@@ -150,11 +147,11 @@
             const codes = await db.codes.toArray();
             codes.forEach(item => {
                 const li = document.createElement('li');
-                li.className = 'flex justify-between items-center bg-gray-100 p-2 rounded mb-2';
+                li.className = 'flex justify-between items-center bg-gray-100 p-2 rounded';
                 li.textContent = item.code;
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = '删除';
-                deleteButton.className = 'text-red-500 hover:text-red-700';
+                deleteButton.className = 'text-red-500 hover:text-red-700 ml-4';
                 deleteButton.onclick = () => deleteCode(item.id);
                 li.appendChild(deleteButton);
                 historyList.appendChild(li);
@@ -362,6 +359,40 @@
             .then(html => {
                 document.getElementById('nav-placeholder').innerHTML = html;
             });
+
+        // 移动端菜单交互
+        document.addEventListener('DOMContentLoaded', function () {
+            const mobileMenuButton = document.getElementById('mobileMenuButton');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const closeMobileMenu = document.getElementById('closeMobileMenu');
+            const mobileMenuPanel = document.getElementById('mobileMenuPanel');
+            if (mobileMenuButton && mobileMenu && closeMobileMenu && mobileMenuPanel) {
+                // 展开菜单
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.remove('hidden');
+                    mobileMenuPanel.classList.remove('animate-slide-out');
+                    mobileMenuPanel.classList.add('animate-slide-in');
+                });
+                // 关闭菜单
+                function closeMenuWithAnimation() {
+                    mobileMenuPanel.classList.remove('animate-slide-in');
+                    mobileMenuPanel.classList.add('animate-slide-out');
+                    // 动画结束后隐藏
+                    mobileMenuPanel.addEventListener('animationend', function handler() {
+                        mobileMenu.classList.add('hidden');
+                        mobileMenuPanel.classList.remove('animate-slide-out');
+                        mobileMenuPanel.removeEventListener('animationend', handler);
+                    });
+                }
+                closeMobileMenu.addEventListener('click', closeMenuWithAnimation);
+                // 点击遮罩关闭
+                mobileMenu.addEventListener('click', (e) => {
+                    if (e.target === mobileMenu) {
+                        closeMenuWithAnimation();
+                    }
+                });
+            }
+        });
     </script>
 </body>
 

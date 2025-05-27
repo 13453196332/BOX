@@ -4,66 +4,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>首页 - 纸盒人的网站</title>
+    <title>Web的3D - 纸盒人的网站</title>
+    <meta name="description" content="纸盒人的网站 - Web 3D演示">
     <link rel="icon" href="./博客.png" type="image/png">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="./css/animations.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3B82F6",
+                        secondary: "#1E40AF",
+                        accent: "#10B981",
+                        dark: "#1F2937",
+                        light: "#F9FAFB"
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
-        html, body {
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+
+        .gradient-text {
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, #3B82F6, #10B981);
+        }
+
+        html,
+        body {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
-            overflow: hidden;
+            min-height: 100vh;
+            background: #F9FAFB;
         }
+
         #canvas-container {
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 70vh;
+            min-height: 400px;
+            background: #fff;
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 24px 0 rgba(60, 60, 60, 0.08);
+            margin: 0 auto;
+        }
+
+        @keyframes slide-in {
+            from {
+                transform: translateX(100%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .animate-slide-in {
+            animation: slide-in 0.25s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        @keyframes slide-out {
+            from {
+                transform: translateX(0);
+            }
+
+            to {
+                transform: translateX(100%);
+            }
+        }
+
+        .animate-slide-out {
+            animation: slide-out 0.25s cubic-bezier(.4, 0, .2, 1);
         }
     </style>
 </head>
 
-<body class="from-red-50 to-white bg-gradient-to-b">
-    <div id="nav-placeholder" style="position:fixed;top:0;left:0;width:100%;z-index:1000;"></div>
-    <div id="canvas-container" class="w-full h-screen"></div> <!-- 用于放置Three.js渲染的画布 -->
-
+<body class="bg-light font-sans text-dark min-h-screen flex flex-col">
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold gradient-text">纸盒人</a>
+            <div class="hidden md:flex space-x-8">
+                <a href="index.html" class="text-primary hover:text-secondary font-medium">首页</a>
+                <a href="index.html#tools" class="text-gray-600 hover:text-primary font-medium">工具</a>
+                <a href="about.html" class="text-gray-600 hover:text-primary font-medium">关于</a>
+                <a href="index.html#contact" class="text-gray-600 hover:text-primary font-medium">联系</a>
+                <a href="home.html" class="text-gray-600 hover:text-primary font-medium">对话</a>
+            </div>
+            <button id="mobileMenuButton" class="md:hidden text-gray-600 focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </nav>
+        <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-40 z-50 hidden">
+            <div
+                class="absolute top-0 right-0 w-2/3 max-w-xs bg-white h-full shadow-lg flex flex-col py-8 px-6 animate-slide-in">
+                <button id="closeMobileMenu" class="self-end mb-6 text-gray-600 text-2xl focus:outline-none">
+                    <i class="fas fa-times"></i>
+                </button>
+                <a href="index.html" class="block py-2 px-2 text-primary font-bold text-lg mb-2">首页</a>
+                <a href="index.html#tools" class="block py-2 px-2 text-gray-700 hover:text-primary mb-2">工具</a>
+                <a href="about.html" class="block py-2 px-2 text-gray-700 hover:text-primary mb-2">关于</a>
+                <a href="index.html#contact" class="block py-2 px-2 text-gray-700 hover:text-primary mb-2">联系</a>
+                <a href="home.html" class="block py-2 px-2 text-gray-700 hover:text-primary">对话</a>
+            </div>
+        </div>
+    </header>
+    <!-- Main Content -->
+    <main class="flex-grow">
+        <section class="py-20 px-6">
+            <div class="container mx-auto max-w-4xl text-center mb-8">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">Web的<span class="gradient-text">3D</span></h1>
+                <p class="text-xl text-gray-600 mb-8">基于Three.js的地球3D演示</p>
+            </div>
+            <div class="container mx-auto max-w-4xl flex justify-center">
+                <div id="canvas-container"></div>
+            </div>
+        </section>
+    </main>
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-8 px-6">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2025 纸盒人. 保留所有权利.</p>
+            <p class="mt-2 text-gray-400">Built with passion and ☕</p>
+        </div>
+    </footer>
     <script>
-        // 动态加载 nav.html
-        fetch('nav.html')
-            .then(res => res.text())
-            .then(html => {
-                document.getElementById('nav-placeholder').innerHTML = html;
-            });
-
         // 初始化场景、相机和渲染器
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true }); // 开启抗锯齿
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / (window.innerHeight * 0.7), 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+
+        function resizeCanvas() {
+            const container = document.getElementById('canvas-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        }
+
+        renderer.setClearColor(0xffffff, 1);
         document.getElementById('canvas-container').appendChild(renderer.domElement);
+        resizeCanvas();
 
         // 添加光源
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // 环境光
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
         scene.add(ambientLight);
-        const pointLight = new THREE.PointLight(0xffffff, 1); // 点光源
+        const pointLight = new THREE.PointLight(0xffffff, 1);
         pointLight.position.set(5, 5, 5);
         scene.add(pointLight);
 
         // 创建一个带有纹理的球体
         const textureLoader = new THREE.TextureLoader();
         const earthTexture = textureLoader.load(
-            'earth.jpg', // 确保路径正确
-            () => console.log('纹理加载成功'), // 加载成功回调
-            undefined, // 加载进度回调（可选）
+            'earth.jpg',
+            () => console.log('纹理加载成功'),
+            undefined,
             (error) => {
-                console.error('纹理加载失败', error); // 加载失败回调
+                console.error('纹理加载失败', error);
                 alert('纹理加载失败');
             }
         );
-        const geometry = new THREE.SphereGeometry(1, 32, 32); // 定义球体几何形状
-        const material = new THREE.MeshStandardMaterial({ map: earthTexture }); // 使用纹理材质
-        const earth = new THREE.Mesh(geometry, material); // 创建地球网格
+        const geometry = new THREE.SphereGeometry(1, 32, 32);
+        const material = new THREE.MeshStandardMaterial({ map: earthTexture });
+        const earth = new THREE.Mesh(geometry, material);
         scene.add(earth);
 
         // 设置相机位置
@@ -72,17 +185,42 @@
         // 动画函数
         function animate() {
             requestAnimationFrame(animate);
-            earth.rotation.y += 0.005; // 让地球绕Y轴缓慢旋转
+            earth.rotation.y += 0.005;
             renderer.render(scene, camera);
         }
-
         animate();
 
         // 响应窗口大小变化
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+        window.addEventListener('resize', resizeCanvas);
+        document.addEventListener('DOMContentLoaded', function () {
+            const mobileMenuButton = document.getElementById('mobileMenuButton');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const closeMobileMenu = document.getElementById('closeMobileMenu');
+            const menuPanel = mobileMenu?.querySelector('div.animate-slide-in');
+            if (mobileMenuButton && mobileMenu && closeMobileMenu && menuPanel) {
+                mobileMenuButton.addEventListener('click', () => {
+                    menuPanel.classList.remove('animate-slide-out');
+                    menuPanel.classList.add('animate-slide-in');
+                    mobileMenu.classList.remove('hidden');
+                });
+                function closeMenuWithAnimation() {
+                    menuPanel.classList.remove('animate-slide-in');
+                    menuPanel.classList.add('animate-slide-out');
+                    // 动画结束后隐藏
+                    menuPanel.addEventListener('animationend', function handler() {
+                        mobileMenu.classList.add('hidden');
+                        menuPanel.classList.remove('animate-slide-out');
+                        menuPanel.removeEventListener('animationend', handler);
+                    });
+                }
+                closeMobileMenu.addEventListener('click', closeMenuWithAnimation);
+                // 点击遮罩关闭
+                mobileMenu.addEventListener('click', (e) => {
+                    if (e.target === mobileMenu) {
+                        closeMenuWithAnimation();
+                    }
+                });
+            }
         });
     </script>
 </body>
