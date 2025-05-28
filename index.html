@@ -76,6 +76,43 @@
                 <i class="fas fa-bars text-xl"></i>
             </button>
         </nav>
+        <div id="musicFloatingBox" style="position:absolute;left:0;top:4.5rem;z-index:20;transition:left 0.3s;">
+            <div class="w-28 rounded-xl shadow flex flex-col items-center py-2 px-2 bg-white/70 backdrop-blur"
+                 style="box-shadow: 0 8px 32px rgba(0,0,0,0.10); position:relative;">
+                <!-- 展开/收起按钮，仅移动端显示 -->
+                <button id="musicBoxToggleBtn"
+                    class="block md:hidden absolute right-2 top-2 bg-primary/80 text-white rounded-full w-6 h-6 flex items-center justify-center focus:outline-none"
+                    style="z-index:21;">
+                    <i id="musicBoxToggleIcon" class="fas fa-chevron-right text-xs"></i>
+                </button>
+                <div class="text-xs font-semibold text-primary mb-1">🎵 背景音乐</div>
+                <div class="relative flex flex-col items-center">
+                    <div id="vinyl"
+                        class="w-16 h-16 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 border-4 border-gray-700 flex items-center justify-center transition-transform duration-500"
+                        style="box-shadow: 0 8px 32px rgba(0,0,0,0.10);">
+                        <div
+                            class="w-5 h-5 rounded-full bg-primary border-2 border-white flex items-center justify-center">
+                            <button id="musicToggleBtn"
+                                class="focus:outline-none flex items-center justify-center w-5 h-5 rounded-full bg-white shadow transition hover:bg-gray-100 absolute"
+                                style="left: 50%; top: 50%; transform: translate(-50%, -50%); z-index:2;">
+                                <i id="musicIcon" class="fas fa-pause text-base text-primary"></i>
+                            </button>
+                        </div>
+                        <div
+                            class="absolute w-12 h-12 rounded-full border-2 border-gray-400 opacity-30 pointer-events-none">
+                        </div>
+                        <div
+                            class="absolute w-9 h-9 rounded-full border-2 border-gray-300 opacity-20 pointer-events-none">
+                        </div>
+                        <div
+                            class="absolute w-6 h-6 rounded-full border-2 border-gray-200 opacity-10 pointer-events-none">
+                        </div>
+                    </div>
+                    <span id="musicBtnText" class="sr-only">暂停</span>
+                </div>
+                <audio id="audioPlayer" src="my-music.mp3" preload="auto"></audio>
+            </div>
+        </div>
         <!-- 移动端弹出菜单 -->
         <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-40 z-50 hidden">
             <div class="absolute top-0 right-0 w-2/3 max-w-xs bg-white h-full shadow-lg flex flex-col py-8 px-6 animate-slide-in">
@@ -96,7 +133,7 @@
                 <h1 class="text-4xl md:text-5xl font-bold mb-6">你好，欢迎来到 <span class="gradient-text">纸盒人的网站</span>
                 </h1>
                 <p class="text-xl text-gray-600 mb-8">分享工具、代码与生活点滴</p>
-                <div class="flex justify-center space-x-4">
+                <div class="flex flex-col md:flex-row justify-center md:space-x-4 space-y-4 md:space-y-0">
                     <a href="#tools"
                         class="bg-primary hover:bg-secondary text-white px-6 py-3 rounded-full font-medium transition duration-300">探索工具</a>
                     <a href="about.html"
@@ -150,7 +187,7 @@
                     <div class="w-full md:w-2/3">
                         <p class="text-lg mb-4">我是纸盒人，一名热爱编程与分享的开发者。</p>
                         <p class="text-lg mb-4">喜欢用代码解决实际问题，也喜欢探索各种有趣的工具和技术。</p>
-                        <p class="text-lg mb-6">业余时间喜欢阅读、旅行和尝试新鲜事物。</p>
+                        <p class="text-lg mb-6">业余时间喜欢玩游戏、旅行和尝试新鲜事物。</p>
                         <div class="flex flex-wrap gap-2">
                             <span class="bg-gray-100 px-3 py-1 rounded-full text-sm font-medium">JavaScript</span>
                             <span class="bg-gray-100 px-3 py-1 rounded-full text-sm font-medium">前端开发</span>
@@ -178,12 +215,12 @@
                     <h3 class="text-2xl font-bold text-primary mb-4">其他联系方式</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="bg-gray-50 p-4 rounded-lg">
-                            <h4 class="text-xl font-semibold text-primary mb-2">Call Me</h4>
-                            <p class="text-gray-600">我干死他</p>
+                            <h4 class="text-xl font-semibold text-primary mb-2">暂无</h4>
+                            <p class="text-gray-600">暂无</p>
                         </div>
                         <div class="bg-gray-50 p-4 rounded-lg">
-                            <h4 class="text-xl font-semibold text-primary mb-2">我是个彩笔</h4>
-                            <p class="text-gray-600">求指教</p>
+                            <h4 class="text-xl font-semibold text-primary mb-2">暂无</h4>
+                            <p class="text-gray-600">暂无</p>
                         </div>
                     </div>
                 </div>
@@ -318,6 +355,108 @@
                     }
                 });
             }
+            // 音乐播放器逻辑
+            const audioPlayer = document.getElementById('audioPlayer');
+            const musicToggleBtn = document.getElementById('musicToggleBtn');
+            const musicIcon = document.getElementById('musicIcon');
+            const musicBtnText = document.getElementById('musicBtnText');
+            const vinyl = document.getElementById('vinyl');
+            let vinylRotateInterval = null;
+            if (audioPlayer && musicToggleBtn && musicIcon && musicBtnText && vinyl) {
+                audioPlayer.volume = 0.5;
+                audioPlayer.play().catch(() => { /* 忽略自动播放失败 */ });
+                let playing = true;
+                // 黑胶旋转动画
+                function startVinylRotate() {
+                    let deg = 0;
+                    stopVinylRotate();
+                    vinylRotateInterval = setInterval(() => {
+                        deg = (deg + 1) % 360;
+                        vinyl.style.transform = `rotate(${deg}deg)`;
+                    }, 16);
+                }
+                function stopVinylRotate() {
+                    if (vinylRotateInterval) {
+                        clearInterval(vinylRotateInterval);
+                        vinylRotateInterval = null;
+                    }
+                }
+                startVinylRotate();
+                musicToggleBtn.addEventListener('click', () => {
+                    if (playing) {
+                        audioPlayer.pause();
+                        musicIcon.classList.remove('fa-pause');
+                        musicIcon.classList.add('fa-play');
+                        musicBtnText.textContent = '播放';
+                        stopVinylRotate();
+                    } else {
+                        audioPlayer.play();
+                        musicIcon.classList.remove('fa-play');
+                        musicIcon.classList.add('fa-pause');
+                        musicBtnText.textContent = '暂停';
+                        startVinylRotate();
+                    }
+                    playing = !playing;
+                });
+                // 如果音乐播放结束，自动切换为播放按钮
+                audioPlayer.addEventListener('ended', () => {
+                    musicIcon.classList.remove('fa-pause');
+                    musicIcon.classList.add('fa-play');
+                    musicBtnText.textContent = '播放';
+                    playing = false;
+                    stopVinylRotate();
+                });
+                // 如果用户手动暂停
+                audioPlayer.addEventListener('pause', () => {
+                    if (playing) {
+                        musicIcon.classList.remove('fa-pause');
+                        musicIcon.classList.add('fa-play');
+                        musicBtnText.textContent = '播放';
+                        playing = false;
+                        stopVinylRotate();
+                    }
+                });
+                // 如果用户手动播放
+                audioPlayer.addEventListener('play', () => {
+                    if (!playing) {
+                        musicIcon.classList.remove('fa-play');
+                        musicIcon.classList.add('fa-pause');
+                        musicBtnText.textContent = '暂停';
+                        playing = true;
+                        startVinylRotate();
+                    }
+                });
+            }
+            // 移动端音乐悬浮半隐藏逻辑
+            const musicFloatingBox = document.getElementById('musicFloatingBox');
+            const musicBoxToggleBtn = document.getElementById('musicBoxToggleBtn');
+            const musicBoxToggleIcon = document.getElementById('musicBoxToggleIcon');
+            let musicBoxOpen = false;
+            function updateMusicBoxPosition() {
+                if (window.innerWidth < 768) {
+                    // 移动端，半隐藏
+                    if (!musicBoxOpen) {
+                        musicFloatingBox.style.left = '-70px';
+                        musicBoxToggleIcon.classList.remove('fa-chevron-left');
+                        musicBoxToggleIcon.classList.add('fa-chevron-right');
+                    } else {
+                        musicFloatingBox.style.left = '0';
+                        musicBoxToggleIcon.classList.remove('fa-chevron-right');
+                        musicBoxToggleIcon.classList.add('fa-chevron-left');
+                    }
+                } else {
+                    // PC端，完全显示
+                    musicFloatingBox.style.left = '1rem';
+                }
+            }
+            if (musicBoxToggleBtn) {
+                musicBoxToggleBtn.addEventListener('click', function () {
+                    musicBoxOpen = !musicBoxOpen;
+                    updateMusicBoxPosition();
+                });
+            }
+            window.addEventListener('resize', updateMusicBoxPosition);
+            updateMusicBoxPosition();
         });
     </script>
 </body>
