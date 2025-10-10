@@ -267,6 +267,26 @@
             "小笼包", "水果", "西北风", "烧烤", "泡面", "水饺", "日本料理", "涮羊肉", "兰州拉面", "肯德基", "面包", "臊子面",
             "小笼包", "麦当劳", "沙县小吃", "烤鱼", "海鲜", "铁板烧", "韩国料理", "甜点", "鸭血粉丝汤"
         ];
+        // 本地存储键名
+        const STORAGE_KEY = 'zhir_box_food_options_v1';
+        function saveFoodOptions() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(foodOptions));
+            } catch (e) {
+                console.warn('保存菜单到本地存储失败：', e);
+            }
+        }
+        function loadFoodOptions() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed) && parsed.length > 0 ? parsed : null;
+            } catch (e) {
+                console.warn('读取本地菜单失败：', e);
+                return null;
+            }
+        }
 
         const resultElement = document.getElementById('result');
         const startButton = document.getElementById('startButton');
@@ -307,6 +327,7 @@
                 deleteButton.className = "bg-red-100 text-red-600 px-2 py-1 rounded hover:bg-red-200 ml-2";
                 deleteButton.addEventListener('click', () => {
                     foodOptions.splice(index, 1);
+                    saveFoodOptions();
                     updateMenuList();
                 });
 
@@ -375,6 +396,7 @@
             const newFood = newFoodInput.value.trim();
             if (newFood && !foodOptions.includes(newFood)) {
                 foodOptions.push(newFood);
+                saveFoodOptions();
                 updateMenuList();
                 newFoodInput.value = '';
             }
@@ -385,6 +407,17 @@
             menuModal.classList.remove('show');
         });
         document.addEventListener('DOMContentLoaded', function () {
+            // 初始化加载本地存储中的菜单；若无则用默认菜单初始化一次
+            const stored = loadFoodOptions();
+            if (stored) {
+                // 覆盖内存数组内容
+                foodOptions.length = 0;
+                foodOptions.push(...stored);
+            } else {
+                // 首次写入默认菜单
+                saveFoodOptions();
+            }
+
             const mobileMenuButton = document.getElementById('mobileMenuButton');
             const mobileMenu = document.getElementById('mobileMenu');
             const closeMobileMenu = document.getElementById('closeMobileMenu');
