@@ -1,602 +1,354 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel生成器 - 纸盒人的网站</title>
-    <meta name="description" content="纸盒人的网站 - Excel数据复制工具">
-    <link rel="icon" href="./博客.png" type="image/png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: "#3B82F6",
-                        secondary: "#1E40AF",
-                        accent: "#10B981",
-                        dark: "#1F2937",
-                        light: "#F9FAFB"
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['Fira Code', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/3.2.1/dexie.min.js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Excel 数据合并 — 纸盒人</title>
+  <meta name="description" content="纸盒人的网站 - Excel 数据复制工具">
+  <link rel="icon" href="./博客.png" type="image/png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/3.2.1/dexie.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .excel-card { padding: 32px; }
+    .excel-card h1 { font-size: 1.8rem; font-weight: 800; text-align: center; margin-bottom: 28px; }
 
-        .gradient-text {
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-            background-image: linear-gradient(90deg, #3B82F6, #10B981);
-        }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
 
-        /* 文件选择、弹窗等保留原有样式 */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease-in-out;
-        }
+    .file-drop {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      border-radius: var(--radius-md);
+      background: var(--bg-glass);
+      border: 1px dashed var(--border-glass);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      position: relative;
+    }
+    .file-drop:hover { border-color: var(--primary); background: rgba(0,212,255,0.05); }
+    .file-drop input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer;
+    }
+    .file-drop .fd-icon { font-size: 1.3rem; color: var(--primary); }
+    .file-drop .fd-label { flex: 1; font-size: 0.88rem; color: var(--text-muted); }
+    .file-drop .fd-name { font-size: 0.88rem; font-weight: 600; color: var(--text-primary); }
 
-        .modal-overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
+    .mapping-section { margin-bottom: 16px; }
+    .mapping-row {
+      display: flex; gap: 8px; align-items: center;
+      padding: 12px; border-radius: var(--radius-sm);
+      background: var(--bg-glass); border: 1px solid var(--border-subtle);
+      margin-bottom: 8px;
+    }
+    .mapping-row input {
+      background: var(--bg-glass-strong);
+      padding: 8px 12px;
+      font-size: 0.85rem;
+    }
+    .mapping-row .arrow { color: var(--text-muted); font-size: 0.9rem; }
+    .mapping-row .del-map {
+      background: rgba(239,68,68,0.1); border: none; color: #ef4444;
+      padding: 6px 12px; border-radius: var(--radius-sm); cursor: pointer;
+      font-size: 0.8rem; transition: background var(--transition-fast);
+      white-space: nowrap;
+    }
+    .mapping-row .del-map:hover { background: rgba(239,68,68,0.2); }
 
-        .modal-content {
-            background: white;
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            transform: translateY(20px);
-            opacity: 0;
-            transition: all 0.3s ease-in-out;
-            max-width: 90%;
-            width: 400px;
-        }
+    .btn-secondary {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 10px 20px; border-radius: var(--radius-full);
+      background: rgba(34,211,238,0.1); color: var(--accent);
+      border: 1px solid rgba(34,211,238,0.2);
+      font-family: inherit; font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; transition: all var(--transition-base);
+      width: 100%;
+    }
+    .btn-secondary:hover { background: rgba(34,211,238,0.18); border-color: var(--accent); }
 
-        .modal-overlay.show .modal-content {
-            transform: translateY(0);
-            opacity: 1;
-        }
+    /* 弹窗（暗色适配） */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+      display: none; align-items: center; justify-content: center; z-index: 300;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-box {
+      background: var(--bg-card); border: 1px solid var(--border-glass);
+      border-radius: var(--radius-lg); padding: 28px; max-width: 420px; width: 90%;
+      backdrop-filter: blur(20px); box-shadow: var(--shadow-card);
+    }
+    .modal-box h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 12px; }
+    .modal-box .msg { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin-bottom: 20px; white-space: pre-line; }
+    .modal-box .modal-btn {
+      width: 100%; padding: 10px; border-radius: var(--radius-md);
+      border: none; color: #fff; font-weight: 600; font-size: 0.9rem;
+      cursor: pointer; transition: opacity var(--transition-fast);
+    }
 
-        .modal-title {
-            color: #1a202c;
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
+    .loading-spinner {
+      display: inline-block; width: 32px; height: 32px;
+      border: 3px solid var(--border-subtle); border-top-color: var(--primary);
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-        .modal-message {
-            color: #4a5568;
-            margin-bottom: 1.5rem;
-            white-space: pre-line;
-            line-height: 1.5;
-        }
+    .loading-box { text-align: center; padding: 16px 0; }
+    .loading-box p { margin-top: 10px; color: var(--text-secondary); font-size: 0.9rem; }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .loading-spinner {
-            animation: spin 1s linear infinite;
-        }
-
-        .file-input-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-            width: 100%;
-        }
-
-        .file-input-wrapper input[type="file"] {
-            position: absolute;
-            left: 0;
-            top: 0;
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-        }
-
-        .file-input-trigger {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 1rem;
-            background-color: #f7fafc;
-            border: 2px dashed #e2e8f0;
-            border-radius: 0.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .file-input-wrapper:hover .file-input-trigger {
-            border-color: #cbd5e0;
-            background-color: #edf2f7;
-        }
-
-        .file-input-wrapper.has-file .file-input-trigger {
-            border-color: #9ae6b4;
-            background-color: #f0fff4;
-        }
-
-        .file-icon {
-            width: 1.5rem;
-            height: 1.5rem;
-            margin-right: 0.75rem;
-            color: #718096;
-        }
-
-        .file-input-wrapper.has-file .file-icon {
-            color: #48bb78;
-        }
-
-        .file-label {
-            flex: 1;
-            color: #718096;
-            font-size: 0.875rem;
-        }
-
-        .file-name {
-            color: #2d3748;
-            font-weight: 500;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        @keyframes slide-in {
-            from {
-                transform: translateX(100%);
-            }
-
-            to {
-                transform: translateX(0);
-            }
-        }
-
-        @keyframes slide-out {
-            from {
-                transform: translateX(0);
-            }
-
-            to {
-                transform: translateX(100%);
-            }
-        }
-
-        .animate-slide-in {
-            animation: slide-in 0.25s cubic-bezier(.4, 0, .2, 1);
-        }
-
-        .animate-slide-out {
-            animation: slide-out 0.25s cubic-bezier(.4, 0, .2, 1);
-        }
-    </style>
+    @media (max-width: 640px) {
+      .excel-card { padding: 20px; }
+      .mapping-row { flex-wrap: wrap; }
+    }
+  </style>
 </head>
+<body>
+  <div class="bg-particles" aria-hidden="true"></div>
 
-<body class="bg-light font-sans text-dark min-h-screen flex flex-col">
-    <header class="bg-white shadow-sm sticky top-0 z-10">
-        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="index.html" class="text-2xl font-bold gradient-text">纸盒人</a>
-            <div class="hidden md:flex space-x-8">
-                <a href="index.html" class="text-primary hover:text-secondary font-medium">首页</a>
-                <a href="index.html#tools" class="text-gray-600 hover:text-primary font-medium">工具</a>
-                <a href="about.html" class="text-gray-600 hover:text-primary font-medium">关于</a>
-                <a href="index.html#contact" class="text-gray-600 hover:text-primary font-medium">联系</a>
-                <a href="home.html" class="text-gray-600 hover:text-primary font-medium">对话</a>
-            </div>
-            <button id="mobileMenuButton" class="md:hidden text-gray-600 focus:outline-none">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
-        </nav>
-        <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-40 z-50 hidden">
-            <div class="absolute top-0 right-0 w-2/3 max-w-xs bg-white h-full shadow-lg flex flex-col py-8 px-6 animate-slide-in"
-                id="mobileMenuPanel">
-                <button id="closeMobileMenu" class="self-end mb-6 text-gray-600 text-2xl focus:outline-none">
-                    <i class="fas fa-times"></i>
-                </button>
-                <a href="index.html" class="block py-2 px-2 text-primary font-bold text-lg mb-2">首页</a>
-                <a href="index.html#tools" class="block py-2 px-2 text-gray-700 hover:text-primary mb-2">工具</a>
-                <a href="about.html" class="block py-2 px-2 text-gray-700 hover:text-primary mb-2">关于</a>
-                <a href="index.html#contact" class="block py-2 px-2 text-gray-700 hover:text-primary mb-2">联系</a>
-                <a href="home.html" class="block py-2 px-2 text-gray-700 hover:text-primary">对话</a>
-            </div>
-        </div>
-    </header>
-    <main class="flex-grow">
-        <section class="py-20 px-6">
-            <div class="container mx-auto max-w-2xl">
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h1 class="text-2xl font-bold text-primary mb-6">Excel数据复制工具</h1>
-                    <div class="space-y-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">源Excel文件</label>
-                            <div class="file-input-wrapper" id="sourceFileWrapper">
-                                <input type="file" id="sourceFile" accept=".xlsx,.xls"
-                                    onchange="updateFileName(this, 'sourceFileName')">
-                                <div class="file-input-trigger">
-                                    <svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                        </path>
-                                    </svg>
-                                    <div class="file-label">
-                                        <span id="sourceFileName">点击选择源Excel文件</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">目标Excel文件</label>
-                            <div class="file-input-wrapper" id="targetFileWrapper">
-                                <input type="file" id="targetFile" accept=".xlsx,.xls"
-                                    onchange="updateFileName(this, 'targetFileName')">
-                                <div class="file-input-trigger">
-                                    <svg class="file-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                        </path>
-                                    </svg>
-                                    <div class="file-label">
-                                        <span id="targetFileName">点击选择目标Excel文件</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="columnMappings" class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">列映射设置</label>
-                            <div class="flex items-center space-x-2 mapping-row">
-                                <div class="flex-1">
-                                    <input type="text" placeholder="源文件列（如：A）"
-                                        class="source-col w-full p-2 border rounded-lg">
-                                </div>
-                                <div class="flex items-center">
-                                    <span class="text-gray-500">→</span>
-                                </div>
-                                <div class="flex-1">
-                                    <input type="text" placeholder="目标文件列（如：B）"
-                                        class="target-col w-full p-2 border rounded-lg">
-                                </div>
-                                <button onclick="removeMapping(this)"
-                                    class="bg-red-100 text-red-600 px-3 py-2 rounded-lg hover:bg-red-200">
-                                    删除
-                                </button>
-                            </div>
-                        </div>
-                        <button onclick="addNewMapping()"
-                            class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-all duration-300 mb-4">
-                            添加新的列映射
-                        </button>
-                        <button onclick="generateExcel()"
-                            class="w-full bg-primary text-white py-2 px-4 rounded-lg hover:bg-secondary transition-all duration-300">
-                            生成新Excel文件
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-    <!-- 自定义提示框 -->
-    <div id="customModal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-title"></div>
-            <div class="modal-message"></div>
-            <button
-                class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-all duration-300">
-                确定
-            </button>
-        </div>
+  <header class="glass-nav" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="logo">纸盒人</a>
+      <div class="nav-links">
+        <a href="index.html">首页</a>
+        <a href="index.html#tools" class="active">工具</a>
+        <a href="about.html">关于</a>
+        <a href="index.html#contact">联系</a>
+      </div>
+      <button class="nav-toggle" id="navToggle" aria-label="菜单"><i class="fas fa-bars"></i></button>
     </div>
-    <!-- 加载提示框 -->
-    <div id="loadingModal" class="modal-overlay">
-        <div class="modal-content text-center">
-            <svg class="loading-spinner inline-block w-12 h-12 text-primary" xmlns="http://www.w3.org/2000/svg"
-                fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                </path>
-            </svg>
-            <div class="modal-message mt-4 text-gray-600"></div>
-        </div>
+  </header>
+
+  <div class="mobile-menu-overlay" id="mobileOverlay">
+    <div class="mobile-menu-panel" id="mobilePanel">
+      <button class="mobile-menu-close" id="mobileClose" aria-label="关闭菜单"><i class="fas fa-times"></i></button>
+      <nav class="mobile-menu-links">
+        <a href="index.html">首页</a>
+        <a href="index.html#tools" class="active">工具</a>
+        <a href="about.html">关于</a>
+        <a href="index.html#contact">联系</a>
+      </nav>
     </div>
-    <!-- Footer -->
-    <footer class="bg-dark text-white py-8 px-6">
-        <div class="container mx-auto text-center">
-            <p>&copy; 2025 纸盒人. 保留所有权利.</p>
-            <p class="mt-2 text-gray-400">Built with passion and ☕</p>
+  </div>
+
+  <main class="tool-page">
+    <div class="tool-container">
+      <div class="tool-header fade-in-up">
+        <h1><span class="gradient-text">Excel 数据合并</span></h1>
+        <p>将源文件数据按列映射合并到目标文件</p>
+      </div>
+
+      <div class="glass-card excel-card fade-in-up delay-100">
+        <div class="form-group">
+          <label>源 Excel 文件</label>
+          <div class="file-drop" id="sourceDrop">
+            <input type="file" accept=".xlsx,.xls" onchange="updateFileLabel(this, 'sourceLabel', 'sourceDrop')">
+            <i class="fas fa-file-import fd-icon"></i>
+            <span class="fd-label" id="sourceLabel">点击选择源文件</span>
+          </div>
         </div>
-    </footer>
-    <script>
-        function updateFileName(input, targetId) {
-            const fileName = input.files[0]?.name || '点击选择Excel文件';
-            document.getElementById(targetId).textContent = fileName;
+        <div class="form-group">
+          <label>目标 Excel 文件</label>
+          <div class="file-drop" id="targetDrop">
+            <input type="file" accept=".xlsx,.xls" onchange="updateFileLabel(this, 'targetLabel', 'targetDrop')">
+            <i class="fas fa-file-export fd-icon"></i>
+            <span class="fd-label" id="targetLabel">点击选择目标文件</span>
+          </div>
+        </div>
 
-            // 更新包装器的状态
-            const wrapper = input.closest('.file-input-wrapper');
-            if (input.files.length > 0) {
-                wrapper.classList.add('has-file');
-            } else {
-                wrapper.classList.remove('has-file');
-            }
-        }
+        <div class="form-group">
+          <label>列映射设置</label>
+          <div class="mapping-section" id="columnMappings">
+            <div class="mapping-row">
+              <input type="text" placeholder="源列 (A)" class="source-col" style="flex:1;">
+              <span class="arrow"><i class="fas fa-arrow-right"></i></span>
+              <input type="text" placeholder="目标列 (B)" class="target-col" style="flex:1;">
+              <button class="del-map" onclick="removeMapping(this)">删除</button>
+            </div>
+          </div>
+          <button onclick="addNewMapping()" class="btn-secondary" style="margin-bottom:12px;">
+            <i class="fas fa-plus"></i> 添加列映射
+          </button>
+          <button onclick="generateExcel()" class="btn btn-primary btn-block">
+            <i class="fas fa-play"></i> 生成新 Excel 文件
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
 
-        function readExcelFile(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    try {
-                        const data = new Uint8Array(e.target.result);
-                        const workbook = XLSX.read(data, { type: 'array' });
-                        if (!workbook.SheetNames.length) {
-                            throw new Error('Excel文件中没有工作表');
-                        }
-                        console.log('工作表名称:', workbook.SheetNames);
-                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                        // 检查工作表是否为空
-                        if (!firstSheet || !Object.keys(firstSheet).length) {
-                            throw new Error('工作表是空的');
-                        }
-                        // 获取工作表的范围
-                        const range = XLSX.utils.decode_range(firstSheet['!ref'] || 'A1');
-                        console.log('工作表范围:', range);
-                        const jsonData = XLSX.utils.sheet_to_json(firstSheet, {
-                            raw: true,
-                            defval: null,  // 空单元格的默认值设为null
-                            header: 'A'     // 使用A,B,C作为列标识
-                        });
-                        console.log('读取到的原始数据:', jsonData);
-                        if (!jsonData.length) {
-                            const data = [];
-                            for (let R = range.s.r; R <= range.e.r; ++R) {
-                                const row = {};
-                                for (let C = range.s.c; C <= range.e.c; ++C) {
-                                    const cell_address = { c: C, r: R };
-                                    const cell_ref = XLSX.utils.encode_cell(cell_address);
-                                    const cell = firstSheet[cell_ref];
-                                    const column_letter = XLSX.utils.encode_col(C);
-                                    row[column_letter] = cell ? cell.v : '';
-                                }
-                                data.push(row);
-                            }
-                            console.log('使用备用方法读取的数据:', data);
-                            resolve(data);
-                            return;
-                        }
-                        console.log('处理后的数据:', jsonData);
-                        resolve(jsonData);
-                    } catch (error) {
-                        console.error('读取Excel文件错误:', error);
-                        reject(new Error('读取Excel文件失败: ' + error.message));
-                    }
-                };
-                reader.onerror = (error) => {
-                    console.error('文件读取错误:', error);
-                    reject(new Error('文件读取失败'));
-                };
-                reader.readAsArrayBuffer(file);
-            });
-        }
-        function addNewMapping() {
-            const mappingsDiv = document.getElementById('columnMappings');
-            const newMapping = document.createElement('div');
-            newMapping.className = 'flex items-center space-x-2 mapping-row mt-2';
-            newMapping.innerHTML = `
-                <div class="flex-1">
-                    <input type="text" placeholder="源文件列（如：A）" 
-                           class="source-col w-full p-2 border rounded-lg">
-                </div>
-                <div class="flex items-center">
-                    <span class="text-gray-500">→</span>
-                </div>
-                <div class="flex-1">
-                    <input type="text" placeholder="目标文件列（如：B）" 
-                           class="target-col w-full p-2 border rounded-lg">
-                </div>
-                <button onclick="removeMapping(this)" 
-                        class="bg-red-100 text-red-600 px-3 py-2 rounded-lg hover:bg-red-200">
-                    删除
-                </button>
-            `;
-            mappingsDiv.appendChild(newMapping);
-        }
-        function removeMapping(button) {
-            const mappingRows = document.querySelectorAll('.mapping-row');
-            if (mappingRows.length > 1) {
-                button.closest('.mapping-row').remove();
-            } else {
-                showModal('提示', '至少需要保留一个列映射', 'error');
-            }
-        }
-        function getColumnMappings() {
-            const mappings = [];
-            document.querySelectorAll('.mapping-row').forEach(row => {
-                const sourceCol = row.querySelector('.source-col').value.trim().toUpperCase();
-                const targetCol = row.querySelector('.target-col').value.trim().toUpperCase();
-                if (sourceCol && targetCol) {
-                    mappings.push({ source: sourceCol, target: targetCol });
-                }
-            });
-            return mappings;
-        }
-        function mergeExcelData(sourceData, targetData, columnMappings) {
-            try {
-                console.log('开始合并数据');
-                console.log('源数据:', sourceData);
-                console.log('目标数据:', targetData);
-                console.log('列映射:', columnMappings);
-                const result = [...targetData];
-                sourceData.forEach(sourceRow => {
-                    // 创建新行对象
-                    const newRow = {};
-                    // 根据映射关系复制数据
-                    columnMappings.forEach(mapping => {
-                        if (sourceRow[mapping.source] !== undefined) {
-                            newRow[mapping.target] = sourceRow[mapping.source];
-                        }
-                    });
-                    result.push(newRow);
-                });
+  <footer class="site-footer">
+    <p>&copy; <span id="cyear"></span> <span class="footer-heart">♦</span> 纸盒人. Built with <span class="footer-heart">❤</span> and ☕</p>
+  </footer>
 
-                console.log('合并后的数据:', result);
-                return result;
-            } catch (error) {
-                console.error('数据合并错误:', error);
-                alert('合并数据时出错：' + error.message);
-                return targetData;
-            }
-        }
-        function showModal(title, message, type = 'info') {
-            const modal = document.getElementById('customModal');
-            const titleEl = modal.querySelector('.modal-title');
-            const messageEl = modal.querySelector('.modal-message');
-            const button = modal.querySelector('button');
+  <!-- 弹窗 -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box">
+      <h3 id="modalTitle"></h3>
+      <div class="msg" id="modalMessage"></div>
+      <button class="modal-btn" id="modalBtn" style="background:var(--gradient-primary);">确定</button>
+    </div>
+  </div>
 
-            titleEl.textContent = title;
-            messageEl.textContent = message;
-            switch (type) {
-                case 'error':
-                    titleEl.className = 'modal-title text-red-600';
-                    button.className = 'w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-all duration-300';
-                    break;
-                case 'success':
-                    titleEl.className = 'modal-title text-green-600';
-                    button.className = 'w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-all duration-300';
-                    break;
-                default:
-                    titleEl.className = 'modal-title text-gray-800';
-                    button.className = 'w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-all duration-300';
-            }
-            modal.classList.add('show');
-            button.onclick = () => modal.classList.remove('show');
-            modal.onclick = (e) => {
-                if (e.target === modal) modal.classList.remove('show');
-            };
-        }
-        // 加载提示框函数
-        function showLoading(message) {
-            const modal = document.getElementById('loadingModal');
-            const messageEl = modal.querySelector('.modal-message');
-            messageEl.textContent = message;
-            modal.classList.add('show');
-        }
-        function hideLoading() {
-            const modal = document.getElementById('loadingModal');
-            modal.classList.remove('show');
-        }
-        async function generateExcel() {
-            try {
-                const sourceFile = document.getElementById('sourceFile').files[0];
-                const targetFile = document.getElementById('targetFile').files[0];
-                const columnMappings = getColumnMappings();
+  <!-- 加载弹窗 -->
+  <div class="modal-overlay" id="loadingOverlay">
+    <div class="modal-box" style="text-align:center;">
+      <div class="loading-box">
+        <div class="loading-spinner"></div>
+        <p id="loadingText">正在处理...</p>
+      </div>
+    </div>
+  </div>
 
-                if (!sourceFile) {
-                    showModal('提示', '请选择源Excel文件', 'error');
-                    return;
-                }
-                if (!targetFile) {
-                    showModal('提示', '请选择目标Excel文件', 'error');
-                    return;
-                }
-                if (columnMappings.length === 0) {
-                    showModal('提示', '请至少设置一个有效的列映射', 'error');
-                    return;
-                }
-                // 验证列标识格式
-                const isValidColumn = col => /^[A-Z]+$/.test(col);
-                for (const mapping of columnMappings) {
-                    if (!isValidColumn(mapping.source)) {
-                        showModal('格式错误', `无效的源文件列标识：${mapping.source}\n请使用字母（如：A、B、C）`, 'error');
-                        return;
-                    }
-                    if (!isValidColumn(mapping.target)) {
-                        showModal('格式错误', `无效的目标文件列标识：${mapping.target}\n请使用字母（如：A、B、C）`, 'error');
-                        return;
-                    }
-                }
-                showLoading('正在处理Excel文件，请稍候...')
-                // 读取源文件
-                console.log('正在读取源文件...');
-                const sourceData = await readExcelFile(sourceFile);
-                console.log('源文件读取完成，数据行数:', sourceData.length);
-                // 读取目标文件
-                console.log('正在读取目标文件...');
-                const targetData = await readExcelFile(targetFile);
-                console.log('目标文件读取完成，数据行数:', targetData.length);
-                if (!sourceData.length) {
-                    hideLoading();
-                    showModal('错误', '源文件中没有数据，请检查文件是否正确', 'error');
-                    return;
-                }
-                const mergedData = mergeExcelData(sourceData, targetData, columnMappings);
-                // 生成新文件
-                const wb = XLSX.utils.book_new();
-                const ws = XLSX.utils.json_to_sheet(mergedData, { skipHeader: true });
-                XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-                XLSX.writeFile(wb, `新的文件_${timestamp}.xlsx`);
+  <script>
+    // === 导航 + 菜单 + 动画（与首页相同） ===
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => { navbar.classList.toggle('scrolled', window.scrollY > 40); }, { passive: true });
 
-                hideLoading();
-                const mappingText = columnMappings
-                    .map(m => `${m.source}列 → ${m.target}列`)
-                    .join('\n');
-                showModal('成功', `文件生成成功！\n已将源文件的数据追加到目标文件的末尾\n\n列映射关系：\n${mappingText}`, 'success');
-            } catch (error) {
-                hideLoading();
-                console.error('处理过程中出错:', error);
-                showModal('错误', `处理Excel文件时出错：${error.message}\n\n请按F12打开控制台查看详细错误信息`, 'error');
-            }
-        }
-        document.addEventListener('DOMContentLoaded', function () {
-            const mobileMenuButton = document.getElementById('mobileMenuButton');
-            const mobileMenu = document.getElementById('mobileMenu');
-            const closeMobileMenu = document.getElementById('closeMobileMenu');
-            const mobileMenuPanel = document.getElementById('mobileMenuPanel');
-            if (mobileMenuButton && mobileMenu && closeMobileMenu && mobileMenuPanel) {
-                mobileMenuButton.addEventListener('click', () => {
-                    mobileMenu.classList.remove('hidden');
-                    mobileMenuPanel.classList.remove('animate-slide-out');
-                    mobileMenuPanel.classList.add('animate-slide-in');
-                });
-                function closeMenuWithAnimation() {
-                    mobileMenuPanel.classList.remove('animate-slide-in');
-                    mobileMenuPanel.classList.add('animate-slide-out');
-                    mobileMenuPanel.addEventListener('animationend', function handler() {
-                        mobileMenu.classList.add('hidden');
-                        mobileMenuPanel.classList.remove('animate-slide-out');
-                        mobileMenuPanel.removeEventListener('animationend', handler);
-                    });
+    const navToggle = document.getElementById('navToggle');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    const mobilePanel = document.getElementById('mobilePanel');
+    const mobileClose = document.getElementById('mobileClose');
+    navToggle.addEventListener('click', () => { mobileOverlay.classList.add('open'); mobilePanel.classList.add('open'); document.body.style.overflow = 'hidden'; });
+    mobileClose.addEventListener('click', () => { mobileOverlay.classList.remove('open'); mobilePanel.classList.remove('open'); document.body.style.overflow = ''; });
+    mobileOverlay.addEventListener('click', (e) => { if (e.target === mobileOverlay) { mobileOverlay.classList.remove('open'); mobilePanel.classList.remove('open'); document.body.style.overflow = ''; } });
+    mobilePanel.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { mobileOverlay.classList.remove('open'); mobilePanel.classList.remove('open'); document.body.style.overflow = ''; }));
+
+    document.querySelectorAll('.fade-in-up').forEach(el => {
+      new IntersectionObserver(([entry], obs) => {
+        if (entry.isIntersecting) { entry.target.classList.add('visible'); obs.unobserve(entry.target); }
+      }, { threshold: 0.1 }).observe(el);
+    });
+
+    // === Excel 逻辑（保持不变） ===
+    function updateFileLabel(input, labelId, dropId) {
+      const label = document.getElementById(labelId);
+      const drop = document.getElementById(dropId);
+      if (input.files[0]) {
+        label.textContent = input.files[0].name;
+        drop.style.borderColor = 'rgba(0,212,255,0.3)';
+      } else {
+        label.textContent = '点击选择文件';
+        drop.style.borderColor = '';
+      }
+    }
+
+    function readExcelFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            if (!workbook.SheetNames.length) throw new Error('Excel 文件中没有工作表');
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            if (!firstSheet || !Object.keys(firstSheet).length) throw new Error('工作表是空的');
+            const range = XLSX.utils.decode_range(firstSheet['!ref'] || 'A1');
+            const jsonData = XLSX.utils.sheet_to_json(firstSheet, { raw: true, defval: null, header: 'A' });
+            if (!jsonData.length) {
+              const data = [];
+              for (let R = range.s.r; R <= range.e.r; ++R) {
+                const row = {};
+                for (let C = range.s.c; C <= range.e.c; ++C) {
+                  const cell = firstSheet[XLSX.utils.encode_cell({ c: C, r: R })];
+                  row[XLSX.utils.encode_col(C)] = cell ? cell.v : '';
                 }
-                closeMobileMenu.addEventListener('click', closeMenuWithAnimation);
-                mobileMenu.addEventListener('click', (e) => {
-                    if (e.target === mobileMenu) {
-                        closeMenuWithAnimation();
-                    }
-                });
+                data.push(row);
+              }
+              resolve(data); return;
             }
-        });
-    </script>
+            resolve(jsonData);
+          } catch (error) { reject(new Error('读取失败: ' + error.message)); }
+        };
+        reader.onerror = () => reject(new Error('文件读取失败'));
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    function addNewMapping() {
+      const container = document.getElementById('columnMappings');
+      const row = document.createElement('div');
+      row.className = 'mapping-row';
+      row.innerHTML = `<input type="text" placeholder="源列 (A)" class="source-col" style="flex:1;">
+        <span class="arrow"><i class="fas fa-arrow-right"></i></span>
+        <input type="text" placeholder="目标列 (B)" class="target-col" style="flex:1;">
+        <button class="del-map" onclick="removeMapping(this)">删除</button>`;
+      container.appendChild(row);
+    }
+
+    function removeMapping(btn) {
+      const rows = document.querySelectorAll('.mapping-row');
+      if (rows.length > 1) btn.closest('.mapping-row').remove();
+      else showModal('提示', '至少保留一个列映射', false);
+    }
+
+    function getColumnMappings() {
+      const mappings = [];
+      document.querySelectorAll('.mapping-row').forEach(row => {
+        const src = row.querySelector('.source-col').value.trim().toUpperCase();
+        const tgt = row.querySelector('.target-col').value.trim().toUpperCase();
+        if (src && tgt && /^[A-Z]+$/.test(src) && /^[A-Z]+$/.test(tgt)) mappings.push({ source: src, target: tgt });
+      });
+      return mappings;
+    }
+
+    function mergeExcelData(sourceData, targetData, columnMappings) {
+      const result = [...targetData];
+      sourceData.forEach(sourceRow => {
+        const newRow = {};
+        columnMappings.forEach(m => { if (sourceRow[m.source] !== undefined) newRow[m.target] = sourceRow[m.source]; });
+        result.push(newRow);
+      });
+      return result;
+    }
+
+    function showModal(title, message, isError = true) {
+      const overlay = document.getElementById('modalOverlay');
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalMessage').textContent = message;
+      const btn = document.getElementById('modalBtn');
+      btn.style.background = isError ? 'linear-gradient(135deg,#ef4444,#dc2626)' : 'var(--gradient-primary)';
+      overlay.classList.add('show');
+      btn.onclick = () => overlay.classList.remove('show');
+      overlay.onclick = (e) => { if (e.target === overlay) overlay.classList.remove('show'); };
+    }
+
+    function showLoading(msg) {
+      document.getElementById('loadingText').textContent = msg;
+      document.getElementById('loadingOverlay').classList.add('show');
+    }
+
+    function hideLoading() { document.getElementById('loadingOverlay').classList.remove('show'); }
+
+    async function generateExcel() {
+      try {
+        const sourceFile = document.getElementById('sourceFile')?.files?.[0] || document.querySelector('#sourceDrop input[type="file"]').files[0];
+        const targetFile = document.querySelector('#targetDrop input[type="file"]').files[0];
+        const mappings = getColumnMappings();
+        if (!sourceFile) { showModal('提示', '请选择源 Excel 文件', false); return; }
+        if (!targetFile) { showModal('提示', '请选择目标 Excel 文件', false); return; }
+        if (!mappings.length) { showModal('提示', '请至少设置一个列映射', false); return; }
+        showLoading('正在处理 Excel 文件...');
+        const sourceData = await readExcelFile(sourceFile);
+        const targetData = await readExcelFile(targetFile);
+        if (!sourceData.length) { hideLoading(); showModal('错误', '源文件中没有数据', true); return; }
+        const merged = mergeExcelData(sourceData, targetData, mappings);
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(merged, { skipHeader: true });
+        XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+        const ts = new Date().toISOString().replace(/[:.]/g, '-');
+        XLSX.writeFile(wb, `合并结果_${ts}.xlsx`);
+        hideLoading();
+        const mappingText = mappings.map(m => `${m.source}列 → ${m.target}列`).join('\n');
+        showModal('成功', `文件生成成功！已将源数据追加到目标文件末尾\n\n列映射：\n${mappingText}`, false);
+      } catch (err) {
+        hideLoading();
+        showModal('错误', '处理出错：' + err.message, true);
+        console.error(err);
+      }
+    }
+  </script>
+  <script src="theme.js"></script>
 </body>
-
 </html>

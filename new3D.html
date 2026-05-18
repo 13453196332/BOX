@@ -1,228 +1,170 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web的3D - 纸盒人的网站</title>
-    <meta name="description" content="纸盒人的网站 - Web 3D演示">
-    <link rel="icon" href="./博客.png" type="image/png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: "#3B82F6",
-                        secondary: "#1E40AF",
-                        accent: "#10B981",
-                        dark: "#1F2937",
-                        light: "#F9FAFB"
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['Fira Code', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web 3D 演示 — 纸盒人</title>
+  <meta name="description" content="纸盒人的网站 - Web 3D 地球演示">
+  <link rel="icon" href="./博客.png" type="image/png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    html, body { margin: 0; padding: 0; }
 
-        .gradient-text {
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-            background-image: linear-gradient(90deg, #3B82F6, #10B981);
-        }
+    .three-section {
+      padding-top: 96px;
+      padding-bottom: 60px;
+    }
 
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            min-height: 100vh;
-            background: #F9FAFB;
-        }
+    .canvas-wrap {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
 
-        #canvas-container {
-            width: 100vw;
-            height: 70vh;
-            min-height: 400px;
-            background: #fff;
-            border-radius: 1.5rem;
-            box-shadow: 0 4px 24px 0 rgba(60, 60, 60, 0.08);
-            margin: 0 auto;
-        }
+    #canvas-container {
+      width: 100%;
+      height: 60vh;
+      min-height: 400px;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border-glass);
+      box-shadow: var(--shadow-card), var(--shadow-glow);
+      position: relative;
+    }
 
-        @keyframes slide-in {
-            from {
-                transform: translateX(100%);
-            }
+    .three-caption {
+      text-align: center;
+      margin-top: 20px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
 
-            to {
-                transform: translateX(0);
-            }
-        }
+    .three-caption i {
+      color: var(--primary);
+    }
 
-        .animate-slide-in {
-            animation: slide-in 0.25s cubic-bezier(.4, 0, .2, 1);
-        }
-
-        @keyframes slide-out {
-            from {
-                transform: translateX(0);
-            }
-
-            to {
-                transform: translateX(100%);
-            }
-        }
-
-        .animate-slide-out {
-            animation: slide-out 0.25s cubic-bezier(.4, 0, .2, 1);
-        }
-    </style>
+    @media (max-width: 768px) {
+      #canvas-container {
+        height: 50vh;
+        min-height: 300px;
+      }
+    }
+  </style>
 </head>
+<body>
+  <div class="bg-particles" aria-hidden="true"></div>
 
-<body class="bg-light font-sans text-dark min-h-screen flex flex-col">
-    <header class="bg-white shadow-sm sticky top-0 z-10">
-        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="index.html" class="text-2xl font-bold gradient-text">纸盒人</a>
-            <div class="hidden md:flex space-x-8">
-                <a href="index.html" class="text-primary hover:text-secondary font-medium">首页</a>
-                <a href="index.html#tools" class="text-gray-600 hover:text-primary font-medium">工具</a>
-                <a href="about.html" class="text-gray-600 hover:text-primary font-medium">关于</a>
-                <a href="index.html#contact" class="text-gray-600 hover:text-primary font-medium">联系</a>
-                <a href="home.html" class="text-gray-600 hover:text-primary font-medium">对话</a>
-            </div>
-            <button id="mobileMenuButton" class="md:hidden text-gray-600 focus:outline-none">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
-        </nav>
-        <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-40 z-50 hidden">
-            <div
-                class="absolute top-0 right-0 w-2/3 max-w-xs bg-white h-full shadow-lg flex flex-col py-8 px-6 animate-slide-in">
-                <button id="closeMobileMenu" class="self-end mb-6 text-gray-600 text-2xl focus:outline-none">
-                    <i class="fas fa-times"></i>
-                </button>
-                <a href="index.html" class="block py-2 px-2 text-primary font-bold text-lg mb-2">首页</a>
-                <a href="index.html#tools" class="block py-2 px-2 text-gray-700 hover:text-primary mb-2">工具</a>
-                <a href="about.html" class="block py-2 px-2 text-gray-700 hover:text-primary mb-2">关于</a>
-                <a href="index.html#contact" class="block py-2 px-2 text-gray-700 hover:text-primary mb-2">联系</a>
-                <a href="home.html" class="block py-2 px-2 text-gray-700 hover:text-primary">对话</a>
-            </div>
-        </div>
-    </header>
-    <!-- Main Content -->
-    <main class="flex-grow">
-        <section class="py-20 px-6">
-            <div class="container mx-auto max-w-4xl text-center mb-8">
-                <h1 class="text-4xl md:text-5xl font-bold mb-4">Web的<span class="gradient-text">3D</span></h1>
-                <p class="text-xl text-gray-600 mb-8">基于Three.js的地球3D演示</p>
-            </div>
-            <div class="container mx-auto max-w-4xl flex justify-center">
-                <div id="canvas-container"></div>
-            </div>
-        </section>
-    </main>
-    <!-- Footer -->
-    <footer class="bg-dark text-white py-8 px-6">
-        <div class="container mx-auto text-center">
-            <p>&copy; 2025 纸盒人. 保留所有权利.</p>
-            <p class="mt-2 text-gray-400">Built with passion and ☕</p>
-        </div>
-    </footer>
-    <script>
-        // 初始化场景、相机和渲染器
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / (window.innerHeight * 0.7), 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+  <header class="glass-nav" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="logo">纸盒人</a>
+      <div class="nav-links">
+        <a href="index.html">首页</a>
+        <a href="index.html#tools" class="active">工具</a>
+        <a href="about.html">关于</a>
+        <a href="index.html#contact">联系</a>
+      </div>
+      <button class="nav-toggle" id="navToggle" aria-label="菜单"><i class="fas fa-bars"></i></button>
+    </div>
+  </header>
 
-        function resizeCanvas() {
-            const container = document.getElementById('canvas-container');
-            const width = container.clientWidth;
-            const height = container.clientHeight;
-            renderer.setSize(width, height);
-            camera.aspect = width / height;
-            camera.updateProjectionMatrix();
-        }
+  <div class="mobile-menu-overlay" id="mobileOverlay">
+    <div class="mobile-menu-panel" id="mobilePanel">
+      <button class="mobile-menu-close" id="mobileClose" aria-label="关闭菜单"><i class="fas fa-times"></i></button>
+      <nav class="mobile-menu-links">
+        <a href="index.html">首页</a>
+        <a href="index.html#tools" class="active">工具</a>
+        <a href="about.html">关于</a>
+        <a href="index.html#contact">联系</a>
+      </nav>
+    </div>
+  </div>
 
-        renderer.setClearColor(0xffffff, 1);
-        document.getElementById('canvas-container').appendChild(renderer.domElement);
-        resizeCanvas();
+  <main class="three-section">
+    <div class="tool-header fade-in-up">
+      <h1>Web 的 <span class="gradient-text">3D</span></h1>
+      <p>基于 Three.js 的地球 3D 交互展示</p>
+    </div>
+    <div class="canvas-wrap fade-in-up delay-100">
+      <div id="canvas-container"></div>
+      <p class="three-caption">
+        <i class="fas fa-sync-alt"></i> 地球自动旋转 · Three.js
+      </p>
+    </div>
+  </main>
 
-        // 添加光源
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-        scene.add(ambientLight);
-        const pointLight = new THREE.PointLight(0xffffff, 1);
-        pointLight.position.set(5, 5, 5);
-        scene.add(pointLight);
+  <footer class="site-footer">
+    <p>&copy; <span id="cyear"></span> <span class="footer-heart">♦</span> 纸盒人. Built with <span class="footer-heart">❤</span> and ☕</p>
+  </footer>
 
-        // 创建一个带有纹理的球体
-        const textureLoader = new THREE.TextureLoader();
-        const earthTexture = textureLoader.load(
-            'earth.jpg',
-            () => console.log('纹理加载成功'),
-            undefined,
-            (error) => {
-                console.error('纹理加载失败', error);
-                alert('纹理加载失败');
-            }
-        );
-        const geometry = new THREE.SphereGeometry(1, 32, 32);
-        const material = new THREE.MeshStandardMaterial({ map: earthTexture });
-        const earth = new THREE.Mesh(geometry, material);
-        scene.add(earth);
+  <script>
+    // === 导航 + 菜单 + 动画 ===
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => { navbar.classList.toggle('scrolled', window.scrollY > 40); }, { passive: true });
 
-        // 设置相机位置
-        camera.position.z = 3;
+    const navToggle = document.getElementById('navToggle');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    const mobilePanel = document.getElementById('mobilePanel');
+    const mobileClose = document.getElementById('mobileClose');
+    navToggle.addEventListener('click', () => { mobileOverlay.classList.add('open'); mobilePanel.classList.add('open'); document.body.style.overflow = 'hidden'; });
+    mobileClose.addEventListener('click', () => { mobileOverlay.classList.remove('open'); mobilePanel.classList.remove('open'); document.body.style.overflow = ''; });
+    mobileOverlay.addEventListener('click', (e) => { if (e.target === mobileOverlay) { mobileOverlay.classList.remove('open'); mobilePanel.classList.remove('open'); document.body.style.overflow = ''; } });
+    mobilePanel.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { mobileOverlay.classList.remove('open'); mobilePanel.classList.remove('open'); document.body.style.overflow = ''; }));
 
-        // 动画函数
-        function animate() {
-            requestAnimationFrame(animate);
-            earth.rotation.y += 0.005;
-            renderer.render(scene, camera);
-        }
-        animate();
+    document.querySelectorAll('.fade-in-up').forEach(el => {
+      new IntersectionObserver(([entry], obs) => {
+        if (entry.isIntersecting) { entry.target.classList.add('visible'); obs.unobserve(entry.target); }
+      }, { threshold: 0.1 }).observe(el);
+    });
 
-        // 响应窗口大小变化
-        window.addEventListener('resize', resizeCanvas);
-        document.addEventListener('DOMContentLoaded', function () {
-            const mobileMenuButton = document.getElementById('mobileMenuButton');
-            const mobileMenu = document.getElementById('mobileMenu');
-            const closeMobileMenu = document.getElementById('closeMobileMenu');
-            const menuPanel = mobileMenu?.querySelector('div.animate-slide-in');
-            if (mobileMenuButton && mobileMenu && closeMobileMenu && menuPanel) {
-                mobileMenuButton.addEventListener('click', () => {
-                    menuPanel.classList.remove('animate-slide-out');
-                    menuPanel.classList.add('animate-slide-in');
-                    mobileMenu.classList.remove('hidden');
-                });
-                function closeMenuWithAnimation() {
-                    menuPanel.classList.remove('animate-slide-in');
-                    menuPanel.classList.add('animate-slide-out');
-                    // 动画结束后隐藏
-                    menuPanel.addEventListener('animationend', function handler() {
-                        mobileMenu.classList.add('hidden');
-                        menuPanel.classList.remove('animate-slide-out');
-                        menuPanel.removeEventListener('animationend', handler);
-                    });
-                }
-                closeMobileMenu.addEventListener('click', closeMenuWithAnimation);
-                // 点击遮罩关闭
-                mobileMenu.addEventListener('click', (e) => {
-                    if (e.target === mobileMenu) {
-                        closeMenuWithAnimation();
-                    }
-                });
-            }
-        });
-    </script>
+    // === Three.js 地球（原功能保持不变，适配暗色背景） ===
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+
+    function resizeCanvas() {
+      const container = document.getElementById('canvas-container');
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      renderer.setSize(w, h);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+
+    // 暗色背景
+    renderer.setClearColor(0x0a0f1e, 1);
+    document.getElementById('canvas-container').appendChild(renderer.domElement);
+    resizeCanvas();
+
+    // 灯光
+    const ambient = new THREE.AmbientLight(0x404060, 0.6);
+    scene.add(ambient);
+    const point = new THREE.PointLight(0x88ddff, 1.2);
+    point.position.set(5, 5, 5);
+    scene.add(point);
+    const point2 = new THREE.PointLight(0x7c3aed, 0.5);
+    point2.position.set(-3, -2, 4);
+    scene.add(point2);
+
+    const loader = new THREE.TextureLoader();
+    const earthTexture = loader.load('earth.jpg');
+    const geo = new THREE.SphereGeometry(1, 48, 48);
+    const mat = new THREE.MeshStandardMaterial({ map: earthTexture, metalness: 0.1, roughness: 0.6 });
+    const earth = new THREE.Mesh(geo, mat);
+    scene.add(earth);
+
+    camera.position.z = 2.8;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      earth.rotation.y += 0.004;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', resizeCanvas);
+  </script>
+  <script src="theme.js"></script>
 </body>
-
 </html>

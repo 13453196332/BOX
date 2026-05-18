@@ -1,464 +1,658 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>纸盒人的网站</title>
-    <meta name="description" content="纸盒人的个人网站 - 编码、工具与生活">
-    <link rel="icon" href="./博客.png" type="image/png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: "#3B82F6",
-                        secondary: "#1E40AF",
-                        accent: "#10B981",
-                        dark: "#1F2937",
-                        light: "#F9FAFB"
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['Fira Code', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
-        .gradient-text {
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
-            background-image: linear-gradient(90deg, #3B82F6, #10B981);
-        }
-        @keyframes slide-in {
-            from {
-                transform: translateX(100%);
-            }
-            to {
-                transform: translateX(0);
-            }
-        }
-        .animate-slide-in {
-            animation: slide-in 0.25s cubic-bezier(.4, 0, .2, 1);
-        }
-        @keyframes slide-out {
-            from {
-                transform: translateX(0);
-            }
-            to {
-                transform: translateX(100%);
-            }
-        }
-        .animate-slide-out {
-            animation: slide-out 0.25s cubic-bezier(.4, 0, .2, 1);
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>纸盒人 — 数字工作台</title>
+  <meta name="description" content="纸盒人的个人网站 — 编码、工具与生活">
+  <link rel="icon" href="./博客.png" type="image/png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    /* ===== 首页专属样式 ===== */
+
+    /* 首屏 Hero */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+    }
+
+    .hero-content {
+      max-width: 720px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 18px;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      background: rgba(0, 212, 255, 0.08);
+      border: 1px solid rgba(0, 212, 255, 0.25);
+      color: var(--primary);
+      margin-bottom: 24px;
+      letter-spacing: 0.5px;
+    }
+
+    .hero-title {
+      font-size: clamp(2.8rem, 8vw, 5rem);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      letter-spacing: -0.03em;
+    }
+
+    .hero-title .highlight {
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: clamp(1.05rem, 2vw, 1.3rem);
+      color: var(--text-secondary);
+      max-width: 560px;
+      margin: 0 auto 32px;
+      line-height: 1.7;
+    }
+
+    .hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 40px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+    }
+
+    /* 时区/状态指示条 */
+    .hero-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 48px;
+      padding: 8px 20px;
+      border-radius: 9999px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border-subtle);
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .hero-status .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+      50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+    }
+
+    /* ===== 工具卡片网格 ===== */
+    .tools-section {
+      padding: 100px 24px;
+    }
+
+    .section-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .section-desc {
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin: 0 auto 48px;
+      font-size: 1.05rem;
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .tool-card {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .tool-card .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 16px;
+      background: rgba(0, 212, 255, 0.1);
+      color: var(--primary);
+      transition: all var(--transition-base);
+    }
+
+    .tool-card:hover .card-icon {
+      background: var(--gradient-primary);
+      color: #fff;
+      box-shadow: 0 0 24px rgba(0, 212, 255, 0.3);
+    }
+
+    .tool-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .tool-card p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .tool-card .card-arrow {
+      margin-top: 16px;
+      font-size: 0.85rem;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: gap var(--transition-fast);
+    }
+
+    .tool-card:hover .card-arrow {
+      gap: 10px;
+    }
+
+    /* ===== 联系面板 ===== */
+    .contact-section {
+      padding: 100px 24px;
+    }
+
+    .contact-panel {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .contact-panel .contact-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--gradient-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin: 0 auto 20px;
+      box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
+    }
+
+    .contact-panel h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .contact-panel > p {
+      color: var(--text-secondary);
+      margin-bottom: 28px;
+    }
+
+    .contact-methods {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 20px;
+      border-radius: var(--radius-md);
+      background: var(--bg-glass);
+      border: 1px solid var(--border-glass);
+      transition: all var(--transition-fast);
+      text-decoration: none;
+      color: inherit;
+      text-align: left;
+    }
+
+    .contact-item:hover {
+      background: var(--bg-glass-strong);
+      border-color: var(--border-glass-hover);
+      transform: translateX(4px);
+    }
+
+    .contact-item .ci-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .contact-item .ci-icon.email {
+      background: rgba(0, 212, 255, 0.12);
+      color: var(--primary);
+    }
+
+    .contact-item .ci-icon.steam {
+      background: rgba(124, 58, 237, 0.12);
+      color: var(--secondary);
+    }
+
+    .contact-item .ci-icon.github {
+      background: rgba(34, 211, 238, 0.12);
+      color: var(--accent);
+    }
+
+    .contact-item .ci-info {
+      flex: 1;
+    }
+
+    .contact-item .ci-info .ci-label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .contact-item .ci-info .ci-value {
+      font-size: 0.92rem;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .contact-item .ci-arrow {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      transition: transform var(--transition-fast);
+    }
+
+    .contact-item:hover .ci-arrow {
+      transform: translateX(4px);
+    }
+
+    /* ===== 页面间导航区 ===== */
+    .more-section {
+      padding: 0 24px 100px;
+    }
+
+    .more-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .more-item {
+      padding: 24px;
+      text-align: center;
+      text-decoration: none;
+      color: inherit;
+      border-radius: var(--radius-md);
+      background: var(--bg-glass);
+      border: 1px solid var(--border-subtle);
+      transition: all var(--transition-base);
+    }
+
+    .more-item:hover {
+      border-color: var(--border-glass-hover);
+      background: var(--bg-glass-strong);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .more-item i {
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+
+    .more-item h4 {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .more-item p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* 页眉间距补偿（fixed nav） */
+    body {
+      padding-top: 0;
+    }
+  </style>
 </head>
+<body>
 
-<body class="bg-light font-sans text-dark min-h-screen flex flex-col">
-    <header class="bg-white shadow-sm sticky top-0 z-10">
-        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="#" class="text-2xl font-bold gradient-text">纸盒人</a>
-            <div id="nav-menu" class="hidden md:flex space-x-8">
-                <a href="#" class="text-primary hover:text-secondary font-medium">首页</a>
-                <a href="#tools" class="text-gray-600 hover:text-primary font-medium">工具</a>
-                <a href="about.html" class="text-gray-600 hover:text-primary font-medium">关于</a>
-                <a href="#contact" class="text-gray-600 hover:text-primary font-medium">联系</a>
-                <a href="home.html" class="text-gray-600 hover:text-primary font-medium">对话</a>
-            </div>
-            <button id="mobileMenuButton" class="md:hidden text-gray-600 focus:outline-none">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
-        </nav>
-        <div id="musicFloatingBox" style="position:absolute;left:0;top:4.5rem;z-index:20;transition:left 0.3s;">
-            <div class="w-28 rounded-xl shadow flex flex-col items-center py-2 px-2 bg-white/70 backdrop-blur"
-                 style="box-shadow: 0 8px 32px rgba(0,0,0,0.10); position:relative;">
-                <!-- 展开/收起按钮，仅移动端显示 -->
-                <button id="musicBoxToggleBtn"
-                    class="block md:hidden absolute right-2 top-2 bg-primary/80 text-white rounded-full w-6 h-6 flex items-center justify-center focus:outline-none"
-                    style="z-index:21;">
-                    <i id="musicBoxToggleIcon" class="fas fa-chevron-right text-xs"></i>
-                </button>
-                <div class="text-xs font-semibold text-primary mb-1">🎵 背景音乐</div>
-                <div class="relative flex flex-col items-center">
-                    <div id="vinyl"
-                        class="w-16 h-16 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 border-4 border-gray-700 flex items-center justify-center transition-transform duration-500"
-                        style="box-shadow: 0 8px 32px rgba(0,0,0,0.10);">
-                        <div
-                            class="w-5 h-5 rounded-full bg-primary border-2 border-white flex items-center justify-center">
-                            <button id="musicToggleBtn"
-                                class="focus:outline-none flex items-center justify-center w-5 h-5 rounded-full bg-white shadow transition hover:bg-gray-100 absolute"
-                                style="left: 50%; top: 50%; transform: translate(-50%, -50%); z-index:2;">
-                                <i id="musicIcon" class="fas fa-pause text-base text-primary"></i>
-                            </button>
-                        </div>
-                        <div
-                            class="absolute w-12 h-12 rounded-full border-2 border-gray-400 opacity-30 pointer-events-none">
-                        </div>
-                        <div
-                            class="absolute w-9 h-9 rounded-full border-2 border-gray-300 opacity-20 pointer-events-none">
-                        </div>
-                        <div
-                            class="absolute w-6 h-6 rounded-full border-2 border-gray-200 opacity-10 pointer-events-none">
-                        </div>
-                    </div>
-                    <span id="musicBtnText" class="sr-only">暂停</span>
-                </div>
-                <audio id="audioPlayer" src="my-music.mp3" preload="auto"></audio>
-            </div>
-        </div>
-        <!-- 移动端弹出菜单 -->
-        <div id="mobileMenu" class="fixed inset-0 bg-black bg-opacity-40 z-50 hidden">
-            <div class="absolute top-0 right-0 w-2/3 max-w-xs bg-white h-full shadow-lg flex flex-col py-8 px-6 animate-slide-in">
-                <button id="closeMobileMenu" class="self-end mb-6 text-gray-600 text-2xl focus:outline-none">
-                    <i class="fas fa-times"></i>
-                </button>
-                <a href="#" class="block py-2 px-2 text-primary font-bold text-lg mb-2">首页</a>
-                <a href="#tools" class="block py-2 px-2 text-gray-700 hover:text-primary mb-2">工具</a>
-                <a href="about.html" class="block py-2 px-2 text-gray-700 hover:text-primary mb-2">关于</a>
-                <a href="#contact" class="block py-2 px-2 text-gray-700 hover:text-primary mb-2">联系</a>
-                <a href="home.html" class="block py-2 px-2 text-gray-700 hover:text-primary">对话</a>
-            </div>
-        </div>
-    </header>
-    <main class="flex-grow">
-        <section class="py-20 px-6">
-            <div class="container mx-auto max-w-4xl text-center">
-                <h1 class="text-4xl md:text-5xl font-bold mb-6">你好，欢迎来到 <span class="gradient-text">纸盒人的网站</span>
-                </h1>
-                <p class="text-xl text-gray-600 mb-8">分享工具、代码与生活点滴</p>
-                <div class="flex flex-col md:flex-row justify-center md:space-x-4 space-y-4 md:space-y-0">
-                    <a href="#tools"
-                        class="bg-primary hover:bg-secondary text-white px-6 py-3 rounded-full font-medium transition duration-300">探索工具</a>
-                    <a href="about.html"
-                        class="border-2 border-primary text-primary hover:bg-primary hover:text-white px-6 py-3 rounded-full font-medium transition duration-300">关于我</a>
-                    <a href="#contact"
-                        class="border-2 border-accent text-accent hover:bg-accent hover:text-white px-6 py-3 rounded-full font-medium transition duration-300">联系我</a>
-                    <a href="home.html"
-                        class="border-2 border-secondary text-secondary hover:bg-secondary hover:text-white px-6 py-3 rounded-full font-medium transition duration-300">对话</a>
-                </div>
-            </div>
-        </section>
-        <section id="tools" class="py-16 px-6 bg-white">
-            <div class="container mx-auto max-w-5xl">
-                <h2 class="text-3xl font-bold mb-12 text-center">精选工具</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <article class="bg-gray-50 rounded-xl shadow-md p-8 flex flex-col items-start">
-                        <h3 class="text-2xl font-semibold text-primary mb-3">瞎写的编码解析</h3>
-                        <a href="parse.html"
-                            class="bg-primary hover:bg-secondary text-white px-6 py-2 rounded-full font-medium transition duration-300 mt-2">跳转</a>
-                        <div class="text-sm text-gray-400 mt-4" id="date1"></div>
-                    </article>
-                    <article class="bg-gray-50 rounded-xl shadow-md p-8 flex flex-col items-start">
-                        <h3 class="text-2xl font-semibold text-primary mb-3">Excel复制功能</h3>
-                        <a href="Excel.html"
-                            class="bg-primary hover:bg-secondary text-white px-6 py-2 rounded-full font-medium transition duration-300 mt-2">跳转</a>
-                        <div class="text-sm text-gray-400 mt-4" id="date2"></div>
-                    </article>
-                    <article class="bg-gray-50 rounded-xl shadow-md p-8 flex flex-col items-start">
-                        <h3 class="text-2xl font-semibold text-primary mb-3">今天吃什么</h3>
-                        <a href="FortuneTeller.html"
-                            class="bg-primary hover:bg-secondary text-white px-6 py-2 rounded-full font-medium transition duration-300 mt-2">跳转</a>
-                        <div class="text-sm text-gray-400 mt-4" id="date3"></div>
-                    </article>
-                    <article class="bg-gray-50 rounded-xl shadow-md p-8 flex flex-col items-start">
-                        <h3 class="text-2xl font-semibold text-primary mb-3">Web的3D</h3>
-                        <a href="new3D.html"
-                            class="bg-primary hover:bg-secondary text-white px-6 py-2 rounded-full font-medium transition duration-300 mt-2">跳转</a>
-                        <div class="text-sm text-gray-400 mt-4" id="date4"></div>
-                    </article>
-                </div>
-            </div>
-        </section>
-        <section id="about" class="py-16 px-6 bg-gray-50">
-            <div class="container mx-auto max-w-4xl">
-                <h2 class="text-3xl font-bold mb-12 text-center">关于我</h2>
-                <div class="flex flex-col md:flex-row items-center gap-8">
-                    <div class="w-full md:w-1/3">
-                        <img src="https://picsum.photos/400?random=2" alt="纸盒人头像"
-                            class="rounded-full w-64 h-64 object-cover mx-auto shadow-lg" loading="lazy">
-                    </div>
-                    <div class="w-full md:w-2/3">
-                        <p class="text-lg mb-4">我是纸盒人，一名热爱编程与分享的开发者。</p>
-                        <p class="text-lg mb-4">喜欢用代码解决实际问题，也喜欢探索各种有趣的工具和技术。</p>
-                        <p class="text-lg mb-6">业余时间喜欢玩游戏、旅行和尝试新鲜事物。</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="bg-gray-100 px-3 py-1 rounded-full text-sm font-medium">JavaScript</span>
-                            <span class="bg-gray-100 px-3 py-1 rounded-full text-sm font-medium">前端开发</span>
-                            <span class="bg-gray-100 px-3 py-1 rounded-full text-sm font-medium">工具制作</span>
-                            <span class="bg-gray-100 px-3 py-1 rounded-full text-sm font-medium">生活分享</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <section id="contact" class="py-16 px-6 bg-white">
-            <div class="container mx-auto max-w-2xl">
-                <h2 class="text-3xl font-bold mb-12 text-center">联系我</h2>
-                <div class="flex justify-center space-x-4 mb-6">
-                    <button onclick="showSteamDialog()"
-                        class="p-3 bg-gray-800 text-white rounded hover:bg-gray-700 transition">
-                        <i class="fab fa-steam"></i> Steam
-                    </button>
-                    <button onclick="showEmailDialog()"
-                        class="p-3 bg-primary text-white rounded hover:bg-secondary transition">
-                        <i class="fas fa-envelope"></i> 邮箱
-                    </button>
-                </div>
-                <div class="bg-white rounded-lg p-6 shadow-md mt-8">
-                    <h3 class="text-2xl font-bold text-primary mb-4">其他联系方式</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <h4 class="text-xl font-semibold text-primary mb-2">暂无</h4>
-                            <p class="text-gray-600">暂无</p>
-                        </div>
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <h4 class="text-xl font-semibold text-primary mb-2">暂无</h4>
-                            <p class="text-gray-600">暂无</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <section class="py-8 px-6 bg-white">
-            <div class="container mx-auto max-w-2xl text-center">
-                <h2 class="text-2xl font-semibold text-primary mb-2">当前时间</h2>
-                <span id="time" class="text-3xl font-mono text-secondary"></span>
-            </div>
-        </section>
-    </main>
-    <footer class="bg-dark text-white py-8 px-6">
-        <div class="container mx-auto text-center">
-            <p>&copy; 2025 纸盒人. 保留所有权利.</p>
-            <p class="mt-2 text-gray-400">Built with passion and ☕</p>
-        </div>
-    </footer>
+  <!-- 背景粒子层 -->
+  <div class="bg-particles" aria-hidden="true"></div>
 
-    <script>
-        const today = new Date();
-        const formattedDate = today.toISOString().split('T')[0];
-        document.getElementById('date1').textContent = formattedDate;
-        document.getElementById('date2').textContent = formattedDate;
-        document.getElementById('date3').textContent = formattedDate;
-        document.getElementById('date4').textContent = formattedDate;
-        function updateTime() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            const timeString = `${hours}:${minutes}:${seconds}`;
-            document.getElementById('time').textContent = timeString;
-        }
-        setInterval(updateTime, 1000);
-        updateTime();
-        function showSteamDialog() {
-            const steamUrl = "https://steamcommunity.com/profiles/76561198965005221/";
-            const dialogContent = `
-        <div class="p-4">
-            <h3 class="text-lg font-bold mb-2">我的Steam主页</h3>
-            <p class="mb-4">点击下方按钮访问我的Steam主页：</p>
-            <a href="${steamUrl}" target="_blank" 
-               class="w-full p-3 bg-gray-800 text-white rounded hover:bg-gray-700 text-center block">
-                <i class="fab fa-steam"></i> 访问Steam主页
-            </a>
-        </div>`;
-            showDialog(dialogContent);
-        }
-        function showEmailDialog() {
-            const email = "whj1008611@gmail.com";
-            const dialogContent = `
-        <div class="p-4">
-            <h3 class="text-lg font-bold mb-2">我的邮箱</h3>
-            <p class="mb-4">我的联系邮箱是：</p>
-            <div class="bg-gray-100 p-3 rounded mb-4">
-                <span class="font-mono">${email}</span>
+  <!-- ====== 导航栏 ====== -->
+  <header class="glass-nav" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="logo">纸盒人</a>
+      <div class="nav-links">
+        <a href="index.html" class="active">首页</a>
+        <a href="#tools">工具</a>
+        <a href="about.html">关于</a>
+        <a href="#contact">联系</a>
+      </div>
+      <button class="nav-toggle" id="navToggle" aria-label="菜单">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- 移动端菜单 -->
+  <div class="mobile-menu-overlay" id="mobileOverlay">
+    <div class="mobile-menu-panel" id="mobilePanel">
+      <button class="mobile-menu-close" id="mobileClose" aria-label="关闭菜单">
+        <i class="fas fa-times"></i>
+      </button>
+      <nav class="mobile-menu-links">
+        <a href="index.html" class="active">首页</a>
+        <a href="#tools">工具</a>
+        <a href="about.html">关于</a>
+        <a href="#contact">联系</a>
+      </nav>
+    </div>
+  </div>
+
+  <!-- ====== 主内容 ====== -->
+  <main>
+
+    <!-- ===== HERO 首屏 ===== -->
+    <section class="hero">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <i class="fas fa-code"></i> 前端开发者 / 工具创作者
+        </div>
+        <h1 class="hero-title">
+          你好，我是 <span class="highlight">纸盒人</span>
+        </h1>
+        <p class="hero-sub">
+          用代码解决实际问题，探索 AI 与工具的可能性。
+          这里是属于我的数字工作台。
+        </p>
+        <div class="hero-tags">
+          <span class="tag tag-primary"><i class="fas fa-bolt"></i> JavaScript</span>
+          <span class="tag tag-purple"><i class="fas fa-cube"></i> Vue / React</span>
+          <span class="tag tag-accent"><i class="fas fa-mobile-alt"></i> 小程序</span>
+          <span class="tag"><i class="fas fa-paint-brush"></i> 前端开发</span>
+          <span class="tag"><i class="fas fa-tools"></i> 工具制作</span>
+          <span class="tag tag-primary"><i class="fas fa-robot"></i> AI Agent</span>
+          <span class="tag tag-purple"><i class="fas fa-brain"></i> LLM 应用</span>
+        </div>
+        <div class="hero-actions">
+          <a href="#tools" class="btn btn-primary">
+            <i class="fas fa-rocket"></i> 探索工具
+          </a>
+          <a href="about.html" class="btn btn-ghost">
+            <i class="fas fa-user"></i> 关于我
+          </a>
+          <a href="#contact" class="btn btn-ghost-purple">
+            <i class="fas fa-envelope"></i> 联系
+          </a>
+        </div>
+        <div class="hero-status">
+          <span class="dot"></span>
+          <span>在线 — 欢迎交流</span>
+          <span style="color:var(--border-glass-hover);margin:0 6px;">|</span>
+          <span id="liveTime" style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;">--:--:--</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 工具卡片网格 ===== -->
+    <section id="tools" class="tools-section">
+      <div class="text-center fade-in-up">
+        <span class="section-label">/ Tools</span>
+        <h2 class="section-title">精选工具</h2>
+        <p class="section-desc">一些我为自己和朋友们做的小工具，希望能帮到你。</p>
+      </div>
+      <div class="tools-grid">
+        <a href="parse.html" class="tool-card glass-card fade-in-up delay-100">
+          <div class="card-icon"><i class="fas fa-barcode"></i></div>
+          <h3>编码解析器</h3>
+          <p>解析 MA 编码、AHM 编码和 GS1 编码，快速获取产品标识与批次信息。</p>
+          <span class="card-arrow">打开工具 <i class="fas fa-arrow-right"></i></span>
+        </a>
+        <a href="Excel.html" class="tool-card glass-card fade-in-up delay-200">
+          <div class="card-icon"><i class="fas fa-file-excel"></i></div>
+          <h3>Excel 数据合并</h3>
+          <p>将源文件数据按列映射合并到目标文件，快速生成新 Excel 报表。</p>
+          <span class="card-arrow">打开工具 <i class="fas fa-arrow-right"></i></span>
+        </a>
+        <a href="FortuneTeller.html" class="tool-card glass-card fade-in-up delay-300">
+          <div class="card-icon"><i class="fas fa-utensils"></i></div>
+          <h3>今天吃什么</h3>
+          <p>选择困难症的救星！随机推荐美食，告别「今天吃啥」的世纪难题。</p>
+          <span class="card-arrow">打开工具 <i class="fas fa-arrow-right"></i></span>
+        </a>
+        <a href="new3D.html" class="tool-card glass-card fade-in-up delay-400">
+          <div class="card-icon"><i class="fas fa-globe"></i></div>
+          <h3>Web 3D 演示</h3>
+          <p>基于 Three.js 的地球 3D 交互展示，探索 Web 图形能力的边界。</p>
+          <span class="card-arrow">打开工具 <i class="fas fa-arrow-right"></i></span>
+        </a>
+      </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <!-- ===== 关于我（首页摘要） ===== -->
+    <section class="tools-section" style="padding-top:0;">
+      <div class="text-center fade-in-up">
+        <span class="section-label">/ About</span>
+        <h2 class="section-title">关于我</h2>
+        <p class="section-desc">
+          一名热爱编程的前端开发者，喜欢把想法变成可用的工具。
+        </p>
+      </div>
+      <div class="more-grid fade-in-up delay-200">
+        <a href="about.html" class="more-item">
+          <i class="fas fa-address-card"></i>
+          <h4>完整简历</h4>
+          <p>工作经历 · 技能 · 项目</p>
+        </a>
+      </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <!-- ===== 联系面板 ===== -->
+    <section id="contact" class="contact-section">
+      <div class="contact-panel glass-card-strong fade-in-up">
+        <div class="contact-avatar">
+          <i class="fas fa-paper-plane"></i>
+        </div>
+        <h2>保持联系</h2>
+        <p>欢迎随时通过以下方式找到我</p>
+        <div class="contact-methods">
+          <a href="#" class="contact-item" id="emailContact" onclick="showEmailDialog();return false;">
+            <div class="ci-icon email"><i class="fas fa-envelope"></i></div>
+            <div class="ci-info">
+              <div class="ci-label">邮箱</div>
+              <div class="ci-value">whj1008611@gmail.com</div>
             </div>
-            <button onclick="copyEmail('${email}')" 
-                    class="w-full p-3 bg-primary text-white rounded hover:bg-secondary">
-                复制邮箱地址
-            </button>
-        </div>`;
-            showDialog(dialogContent);
-        }
-        function showDialog(content) {
-            const dialog = document.createElement('div');
-            dialog.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-300 z-50';
-            dialog.innerHTML = `
-        <div class="bg-white rounded-lg w-full max-w-md transform transition-all duration-300 scale-95 opacity-0">
-            ${content}
-            <div class="p-4 border-t">
-                <button onclick="this.parentElement.parentElement.parentElement.remove()" 
-                        class="w-full p-2 bg-gray-200 rounded hover:bg-gray-300">
-                    关闭
-                </button>
+            <span class="ci-arrow"><i class="fas fa-chevron-right"></i></span>
+          </a>
+          <a href="https://steamcommunity.com/profiles/76561198965005221/" target="_blank" class="contact-item">
+            <div class="ci-icon steam"><i class="fab fa-steam"></i></div>
+            <div class="ci-info">
+              <div class="ci-label">Steam</div>
+              <div class="ci-value">来联机吧</div>
             </div>
-        </div>`;
-            document.body.appendChild(dialog);
-            setTimeout(() => {
-                dialog.classList.remove('opacity-0');
-                dialog.querySelector('div').classList.remove('scale-95', 'opacity-0');
-                dialog.querySelector('div').classList.add('scale-100', 'opacity-100');
-            }, 10);
+            <span class="ci-arrow"><i class="fas fa-chevron-right"></i></span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ====== 页脚 ====== -->
+  <footer class="site-footer">
+    <p>&copy; <span id="cyear"></span> <span class="footer-heart">♦</span> 纸盒人. Built with <span class="footer-heart">❤</span> and ☕</p>
+  </footer>
+
+  <!-- ====== 弹窗（邮箱） ====== -->
+  <div id="dialogOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:300;align-items:center;justify-content:center;"
+       onclick="if(event.target===this)closeDialog()">
+    <div style="background:var(--bg-card);border:1px solid var(--border-glass);border-radius:var(--radius-lg);padding:32px;max-width:400px;width:90%;backdrop-filter:blur(20px);box-shadow:var(--shadow-card);">
+      <h3 style="font-size:1.2rem;font-weight:700;margin-bottom:16px;color:var(--primary);">📬 我的邮箱</h3>
+      <p style="color:var(--text-secondary);margin-bottom:16px;font-size:0.9rem;">点击复制邮箱地址：</p>
+      <div style="display:flex;align-items:center;gap:8px;background:var(--bg-glass);border:1px solid var(--border-glass);border-radius:var(--radius-md);padding:12px 16px;margin-bottom:16px;">
+        <code id="emailDisplay" style="flex:1;color:var(--text-primary);font-family:'JetBrains Mono',monospace;font-size:0.9rem;">whj1008611@gmail.com</code>
+        <button onclick="copyEmail()" style="background:var(--gradient-primary);border:none;color:#fff;padding:6px 14px;border-radius:var(--radius-sm);cursor:pointer;font-size:0.82rem;font-weight:600;transition:opacity var(--transition-fast);">复制</button>
+      </div>
+      <button onclick="closeDialog()" style="width:100%;padding:10px;border-radius:var(--radius-md);border:1px solid var(--border-glass);background:var(--bg-glass);color:var(--text-secondary);cursor:pointer;font-size:0.9rem;transition:all var(--transition-fast);">关闭</button>
+    </div>
+  </div>
+
+  <!-- ====== Scripts ====== -->
+  <script>
+    // 导航栏滚动效果
+    const navbar = document.getElementById('navbar');
+    let lastScroll = 0;
+
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY;
+      if (y > 40) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+      lastScroll = y;
+    }, { passive: true });
+
+    // 移动端菜单
+    const navToggle = document.getElementById('navToggle');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    const mobilePanel = document.getElementById('mobilePanel');
+    const mobileClose = document.getElementById('mobileClose');
+
+    function openMobileMenu() {
+      mobileOverlay.classList.add('open');
+      mobilePanel.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMobileMenu() {
+      mobileOverlay.classList.remove('open');
+      mobilePanel.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    navToggle.addEventListener('click', openMobileMenu);
+    mobileClose.addEventListener('click', closeMobileMenu);
+    mobileOverlay.addEventListener('click', (e) => {
+      if (e.target === mobileOverlay) closeMobileMenu();
+    });
+
+    // 移动端菜单内点击链接后关闭
+    mobilePanel.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', closeMobileMenu);
+    });
+
+    // 滚动进入动画 (Intersection Observer)
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
         }
-        function copyEmail(email) {
-            navigator.clipboard.writeText(email).then(() => {
-                showToast('邮箱地址已复制到剪贴板');
-            });
-        }
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'fixed bottom-4 right-4 p-4 bg-green-500 text-white rounded-lg shadow-lg transform transition-all duration-300 ease-out opacity-0 translate-y-4 z-50';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.classList.remove('opacity-0', 'translate-y-4');
-                toast.classList.add('opacity-100', 'translate-y-0');
-            }, 10);
-            setTimeout(() => {
-                toast.classList.remove('opacity-100', 'translate-y-0');
-                toast.classList.add('opacity-0', 'translate-y-4');
-            }, 3000);
-            setTimeout(() => {
-                toast.remove();
-            }, 3300);
-        }
-        document.addEventListener('DOMContentLoaded', function () {
-            const mobileMenuButton = document.getElementById('mobileMenuButton');
-            const mobileMenu = document.getElementById('mobileMenu');
-            const closeMobileMenu = document.getElementById('closeMobileMenu');
-            const menuPanel = mobileMenu?.querySelector('div.animate-slide-in');
-            if (mobileMenuButton && mobileMenu && closeMobileMenu && menuPanel) {
-                mobileMenuButton.addEventListener('click', () => {
-                    menuPanel.classList.remove('animate-slide-out');
-                    menuPanel.classList.add('animate-slide-in');
-                    mobileMenu.classList.remove('hidden');
-                });
-                function closeMenuWithAnimation() {
-                    menuPanel.classList.remove('animate-slide-in');
-                    menuPanel.classList.add('animate-slide-out');
-                    menuPanel.addEventListener('animationend', function handler() {
-                        mobileMenu.classList.add('hidden');
-                        menuPanel.classList.remove('animate-slide-out');
-                        menuPanel.removeEventListener('animationend', handler);
-                    });
-                }
-                closeMobileMenu.addEventListener('click', closeMenuWithAnimation);
-                mobileMenu.addEventListener('click', (e) => {
-                    if (e.target === mobileMenu) {
-                        closeMenuWithAnimation();
-                    }
-                });
-            }
-            // 音乐播放器逻辑
-            const audioPlayer = document.getElementById('audioPlayer');
-            const musicToggleBtn = document.getElementById('musicToggleBtn');
-            const musicIcon = document.getElementById('musicIcon');
-            const musicBtnText = document.getElementById('musicBtnText');
-            const vinyl = document.getElementById('vinyl');
-            let vinylRotateInterval = null;
-            if (audioPlayer && musicToggleBtn && musicIcon && musicBtnText && vinyl) {
-                audioPlayer.volume = 0.5;
-                audioPlayer.play().catch(() => { /* 忽略自动播放失败 */ });
-                let playing = true;
-                // 黑胶旋转动画
-                function startVinylRotate() {
-                    let deg = 0;
-                    stopVinylRotate();
-                    vinylRotateInterval = setInterval(() => {
-                        deg = (deg + 1) % 360;
-                        vinyl.style.transform = `rotate(${deg}deg)`;
-                    }, 16);
-                }
-                function stopVinylRotate() {
-                    if (vinylRotateInterval) {
-                        clearInterval(vinylRotateInterval);
-                        vinylRotateInterval = null;
-                    }
-                }
-                startVinylRotate();
-                musicToggleBtn.addEventListener('click', () => {
-                    if (playing) {
-                        audioPlayer.pause();
-                        musicIcon.classList.remove('fa-pause');
-                        musicIcon.classList.add('fa-play');
-                        musicBtnText.textContent = '播放';
-                        stopVinylRotate();
-                    } else {
-                        audioPlayer.play();
-                        musicIcon.classList.remove('fa-play');
-                        musicIcon.classList.add('fa-pause');
-                        musicBtnText.textContent = '暂停';
-                        startVinylRotate();
-                    }
-                    playing = !playing;
-                });
-                // 如果音乐播放结束，自动切换为播放按钮
-                audioPlayer.addEventListener('ended', () => {
-                    musicIcon.classList.remove('fa-pause');
-                    musicIcon.classList.add('fa-play');
-                    musicBtnText.textContent = '播放';
-                    playing = false;
-                    stopVinylRotate();
-                });
-                // 如果用户手动暂停
-                audioPlayer.addEventListener('pause', () => {
-                    if (playing) {
-                        musicIcon.classList.remove('fa-pause');
-                        musicIcon.classList.add('fa-play');
-                        musicBtnText.textContent = '播放';
-                        playing = false;
-                        stopVinylRotate();
-                    }
-                });
-                // 如果用户手动播放
-                audioPlayer.addEventListener('play', () => {
-                    if (!playing) {
-                        musicIcon.classList.remove('fa-play');
-                        musicIcon.classList.add('fa-pause');
-                        musicBtnText.textContent = '暂停';
-                        playing = true;
-                        startVinylRotate();
-                    }
-                });
-            }
-            // 移动端音乐悬浮半隐藏逻辑
-            const musicFloatingBox = document.getElementById('musicFloatingBox');
-            const musicBoxToggleBtn = document.getElementById('musicBoxToggleBtn');
-            const musicBoxToggleIcon = document.getElementById('musicBoxToggleIcon');
-            let musicBoxOpen = false;
-            function updateMusicBoxPosition() {
-                if (window.innerWidth < 768) {
-                    // 移动端，半隐藏
-                    if (!musicBoxOpen) {
-                        musicFloatingBox.style.left = '-70px';
-                        musicBoxToggleIcon.classList.remove('fa-chevron-left');
-                        musicBoxToggleIcon.classList.add('fa-chevron-right');
-                    } else {
-                        musicFloatingBox.style.left = '0';
-                        musicBoxToggleIcon.classList.remove('fa-chevron-right');
-                        musicBoxToggleIcon.classList.add('fa-chevron-left');
-                    }
-                } else {
-                    // PC端，完全显示
-                    musicFloatingBox.style.left = '1rem';
-                }
-            }
-            if (musicBoxToggleBtn) {
-                musicBoxToggleBtn.addEventListener('click', function () {
-                    musicBoxOpen = !musicBoxOpen;
-                    updateMusicBoxPosition();
-                });
-            }
-            window.addEventListener('resize', updateMusicBoxPosition);
-            updateMusicBoxPosition();
-        });
-    </script>
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.fade-in-up, .fade-in').forEach(el => {
+      observer.observe(el);
+    });
+
+    // 实时时钟
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2,'0');
+      const m = String(now.getMinutes()).padStart(2,'0');
+      const s = String(now.getSeconds()).padStart(2,'0');
+      document.getElementById('liveTime').textContent = h + ':' + m + ':' + s;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // 弹窗系统
+    const dialogOverlay = document.getElementById('dialogOverlay');
+
+    function showEmailDialog() {
+      dialogOverlay.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDialog() {
+      dialogOverlay.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    function copyEmail() {
+      const email = 'whj1008611@gmail.com';
+      navigator.clipboard.writeText(email).then(() => {
+        const btn = document.querySelector('#dialogOverlay button');
+        const orig = btn.textContent;
+        btn.textContent = '✓ 已复制';
+        btn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
+        setTimeout(() => {
+          btn.textContent = orig;
+          btn.style.background = '';
+        }, 2000);
+      });
+    }
+  </script>
+  <script src="theme.js"></script>
 </body>
-
 </html>
