@@ -1016,5 +1016,91 @@
     }
   </script>
   <script src="theme.js"></script>
+  <script>
+// ═══════════════════════════════════════════════
+// 与后台管理系统联动 — 从 API 动态加载数据
+// ═══════════════════════════════════════════════
+(function() {
+  'use strict';
+  var API = 'http://localhost:3001/api/public';
+
+  function escHtml(s) {
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+  function levelLabel(lv) {
+    if (lv >= 90) return '精通';
+    if (lv >= 75) return '熟练';
+    if (lv >= 60) return '熟悉';
+    return '了解';
+  }
+
+  // ── 技能列表 ──
+  fetch(API + '/skills')
+    .then(function(r) { return r.json(); })
+    .then(function(arr) {
+      if (!arr || !arr.length) return;
+      var grid = document.querySelector('.skills-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      arr.forEach(function(s) {
+        var item = document.createElement('div');
+        item.className = 'skill-item';
+        item.innerHTML = '<div class="skill-info"><span class="skill-name">' + escHtml(s.name) + '</span><span class="skill-level">' + levelLabel(s.level) + '</span></div><div class="skill-bar"><div class="fill" data-width="' + s.level + '"></div></div>';
+        grid.appendChild(item);
+        setTimeout(function() {
+          var fill = item.querySelector('.fill');
+          if (fill) fill.style.width = s.level + '%';
+        }, 100);
+      });
+    })
+    .catch(function() { /* 保持已有技能 */ });
+
+  // ── 工作经历 ──
+  fetch(API + '/work-experiences')
+    .then(function(r) { return r.json(); })
+    .then(function(arr) {
+      if (!arr || !arr.length) return;
+      var tl = document.querySelector('.timeline');
+      if (!tl) return;
+      tl.innerHTML = '';
+      arr.forEach(function(w) {
+        var item = document.createElement('div');
+        item.className = 'timeline-item glass-card';
+        item.style.cssText = 'padding:20px 20px 20px 28px;';
+        var dateStr = w.start_date + ' — ' + (w.end_date || '至今');
+        var dutiesHtml = '';
+        (w.duties || []).forEach(function(d) {
+          dutiesHtml += '<span class="tag">' + escHtml(d) + '</span>';
+        });
+        item.innerHTML = '<div class="tl-header"><div><div class="tl-company">' + escHtml(w.company) + '</div><div class="tl-role">' + escHtml(w.role) + '</div></div><span class="tl-date">' + dateStr + '</span></div><div class="tl-duties">' + dutiesHtml + '</div>';
+        tl.appendChild(item);
+      });
+    })
+    .catch(function() { /* 保持已有经历 */ });
+
+  // ── 项目经历 ──
+  fetch(API + '/projects')
+    .then(function(r) { return r.json(); })
+    .then(function(arr) {
+      if (!arr || !arr.length) return;
+      var grid = document.querySelector('.project-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      var iconMap = { code:'fa-code', truck:'fa-truck', gavel:'fa-gavel', 'chart-bar':'fa-chart-bar', globe:'fa-globe', mobile:'fa-mobile-alt', robot:'fa-robot', brain:'fa-brain', tools:'fa-tools', star:'fa-star', user:'fa-user', envelope:'fa-envelope' };
+      arr.forEach(function(p) {
+        var ic = iconMap[p.icon] || 'fa-code';
+        var techHtml = '';
+        (p.tech_tags || []).forEach(function(t) { techHtml += '<span class="tag tag-primary">' + escHtml(t) + '</span>'; });
+        var card = document.createElement('div');
+        card.className = 'project-card glass-card';
+        card.innerHTML = '<div class="pc-header"><div class="pc-icon"><i class="fas ' + ic + '"></i></div><div><h3>' + escHtml(p.title) + '</h3><span class="pc-role">' + escHtml(p.role || '') + '</span></div></div><p class="pc-desc">' + escHtml(p.description || '') + '</p><div class="pc-tech">' + techHtml + '</div>';
+        grid.appendChild(card);
+      });
+    })
+    .catch(function() { /* 保持已有项目 */ });
+})();
+  </script>
 </body>
 </html>

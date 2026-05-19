@@ -654,5 +654,99 @@
     }
   </script>
   <script src="theme.js"></script>
+  <script>
+// ═══════════════════════════════════════════════
+// 与后台管理系统联动 — 从 API 动态加载数据
+// ═══════════════════════════════════════════════
+(function() {
+  'use strict';
+  var API = 'http://localhost:3001/api/public';
+
+  // ── 站点配置：Hero / 联系方式 / 页脚 ──
+  fetch(API + '/site-config')
+    .then(function(r) { return r.json(); })
+    .then(function(m) {
+      var badge = document.querySelector('.hero-badge');
+      if (badge && m.hero_badge) badge.innerHTML = '<i class="fas fa-code"></i> ' + m.hero_badge;
+      var hl = document.querySelector('.hero-title .highlight');
+      if (hl && m.hero_title) hl.textContent = m.hero_title;
+      var sub = document.querySelector('.hero-sub');
+      if (sub && m.hero_subtitle) sub.innerHTML = m.hero_subtitle.replace(/\n/g, '<br>');
+      var logo = document.querySelector('.logo');
+      if (logo && m.site_name) logo.textContent = m.site_name;
+      if (m.contact_email) {
+        var ev = document.querySelector('#emailContact .ci-value');
+        if (ev) ev.textContent = m.contact_email;
+        var ed = document.getElementById('emailDisplay');
+        if (ed) ed.textContent = m.contact_email;
+      }
+      if (m.contact_steam) {
+        var sl = document.querySelector('.contact-item[href*="steam"]');
+        if (sl) sl.href = m.contact_steam;
+      }
+      var fp = document.querySelector('.site-footer p');
+      if (fp && m.footer_text) {
+        var yr = (document.getElementById('cyear') || {}).textContent || new Date().getFullYear();
+        fp.innerHTML = '&copy; <span id="cyear">' + yr + '</span> <span class="footer-heart">♦</span> 纸盒人. ' + m.footer_text;
+      }
+    })
+    .catch(function() { /* 保持已有内容 */ });
+
+  // ── 工具卡片 ──
+  fetch(API + '/tools')
+    .then(function(r) { return r.json(); })
+    .then(function(arr) {
+      if (!arr || !arr.length) return;
+      var grid = document.querySelector('.tools-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      var iconMap = {
+        barcode:'fa-barcode', 'file-excel':'fa-file-excel', utensils:'fa-utensils',
+        globe:'fa-globe', code:'fa-code', link:'fa-link',
+        robot:'fa-robot', brain:'fa-brain', 'paint-brush':'fa-paint-brush',
+        'mobile-alt':'fa-mobile-alt', cube:'fa-cube', bolt:'fa-bolt',
+        tools:'fa-tools', 'chart-bar':'fa-chart-bar', truck:'fa-truck',
+        gavel:'fa-gavel', user:'fa-user', envelope:'fa-envelope',
+        steam:'fa-steam', github:'fa-github', star:'fa-star'
+      };
+      var delays = ['delay-100','delay-200','delay-300','delay-400'];
+      arr.forEach(function(t, i) {
+        var ic = iconMap[t.icon] || 'fa-link';
+        var c = document.createElement('a');
+        c.href = t.url || '#';
+        c.className = 'tool-card glass-card fade-in-up ' + (delays[i % 4] || '');
+        c.classList.add('visible');
+        c.innerHTML = '<div class="card-icon"><i class="fas ' + ic + '"></i></div>'
+          + '<h3>' + escHtml(t.title) + '</h3>'
+          + '<p>' + escHtml(t.description || '') + '</p>'
+          + '<span class="card-arrow">打开工具 <i class="fas fa-arrow-right"></i></span>';
+        grid.appendChild(c);
+      });
+    })
+    .catch(function() { /* 保持已有卡片 */ });
+
+  function escHtml(s) {
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  // 邮箱复制函数改用动态邮箱
+  window.copyEmail = function() {
+    var email = (document.getElementById('emailDisplay') || {}).textContent || 'whj1008611@gmail.com';
+    navigator.clipboard.writeText(email).then(function() {
+      var btn = document.querySelector('#dialogOverlay button');
+      if (!btn) return;
+      var orig = btn.textContent;
+      btn.textContent = '✓ 已复制';
+      btn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
+      setTimeout(function() {
+        btn.textContent = orig;
+        btn.style.background = '';
+      }, 2000);
+    });
+  };
+})();
+  </script>
 </body>
 </html>

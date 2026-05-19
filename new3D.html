@@ -149,8 +149,14 @@
 
     const loader = new THREE.TextureLoader();
     const earthTexture = loader.load('earth.jpg');
+    // 纹理加载失败时用兜底颜色（避免 file:// CORS 下球体不可见）
     const geo = new THREE.SphereGeometry(1, 48, 48);
-    const mat = new THREE.MeshStandardMaterial({ map: earthTexture, metalness: 0.1, roughness: 0.6 });
+    const mat = new THREE.MeshStandardMaterial({
+      map: earthTexture,
+      color: 0x4488cc,
+      metalness: 0.1,
+      roughness: 0.6
+    });
     const earth = new THREE.Mesh(geo, mat);
     scene.add(earth);
 
