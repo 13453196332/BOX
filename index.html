@@ -660,7 +660,8 @@
 // ═══════════════════════════════════════════════
 (function() {
   'use strict';
-  var API = 'http://localhost:3001/api/public';
+  // ⚠️ 部署后改为你的 Railway 地址，例如 https://xxx.up.railway.app/api/public
+  var API = 'https://zhirbox-admin-node-production.up.railway.app/api/public';
 
   // ── 站点配置：Hero / 联系方式 / 页脚 ──
   fetch(API + '/site-config')
