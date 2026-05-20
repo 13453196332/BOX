@@ -408,7 +408,7 @@
 // ═══════════════════════════════════════════════
 (function() {
   'use strict';
-  var API = 'https://zhirbox-admin-node-production.up.railway.app/api/public/tech-overview';
+  var API = 'https://zhirbox-admin-node-production.up.railway.app/api/public';
 
   function escHtml(s) {
     var d = document.createElement('div');
@@ -425,6 +425,7 @@
   };
 
   fetch(API + '/tech-overview')
+
     .then(function(r) { return r.json(); })
     .then(function(arr) {
       var container = document.getElementById('techSections');
