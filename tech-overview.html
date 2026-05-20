@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>技术揭秘 — 纸盒人</title>
+  <meta name="description" content="纸盒人网站的技术架构揭秘 — 前端页面、后台管理系统、后端 Node.js 服务">
+  <link rel="icon" href="./博客.png" type="image/png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    /* ===== 技术揭秘页专属样式 ===== */
+    .tech-page {
+      padding-top: 96px;
+      padding-bottom: 80px;
+    }
+
+    .tech-hero {
+      text-align: center;
+      padding: 60px 24px 40px;
+    }
+
+    .tech-hero .hero-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--gradient-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin: 0 auto 20px;
+      box-shadow: 0 0 40px rgba(0, 212, 255, 0.2);
+    }
+
+    .tech-hero h1 {
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .tech-hero .subtitle {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      max-width: 560px;
+      margin: 0 auto 16px;
+      line-height: 1.7;
+    }
+
+    .tech-hero .tech-tags {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    /* ===== 章节卡片 ===== */
+    .tech-container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .tech-section {
+      margin-bottom: 48px;
+    }
+
+    .tech-section-card {
+      padding: 36px 40px;
+    }
+
+    .tech-section-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-glass);
+    }
+
+    .tech-section-header .ts-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius-md);
+      background: rgba(0, 212, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      font-size: 1.3rem;
+      flex-shrink: 0;
+      transition: all var(--transition-base);
+    }
+
+    .tech-section-card:hover .ts-icon {
+      background: var(--gradient-primary);
+      color: #fff;
+      box-shadow: 0 0 24px rgba(0, 212, 255, 0.3);
+    }
+
+    .tech-section-header h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .tech-section-header .ts-badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* 正文内容样式 */
+    .tech-content {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.8;
+    }
+
+    .tech-content p {
+      margin-bottom: 16px;
+    }
+
+    .tech-content p:last-child {
+      margin-bottom: 0;
+    }
+
+    .tech-content strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .tech-content ul {
+      padding-left: 20px;
+      margin-bottom: 16px;
+    }
+
+    .tech-content ul:last-child {
+      margin-bottom: 0;
+    }
+
+    .tech-content li {
+      margin-bottom: 10px;
+      list-style-type: none;
+      position: relative;
+      padding-left: 20px;
+    }
+
+    .tech-content li::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .tech-content code {
+      background: rgba(0, 212, 255, 0.08);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85em;
+      color: var(--primary);
+      border: 1px solid rgba(0, 212, 255, 0.15);
+    }
+
+    /* 架构示意图 */
+    .arch-diagram {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 12px 8px;
+      margin: 24px 0 8px;
+      padding: 24px;
+      background: var(--bg-glass);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-glass);
+    }
+
+    .arch-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 14px 20px;
+      border-radius: var(--radius-md);
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass-hover);
+      min-width: 100px;
+    }
+
+    .arch-item i {
+      font-size: 1.5rem;
+      color: var(--primary);
+    }
+
+    .arch-item span {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .arch-arrow {
+      color: var(--text-muted);
+      font-size: 1.2rem;
+    }
+
+    /* 加载 / 空状态 */
+    .loading-state, .empty-state {
+      text-align: center;
+      padding: 80px 24px;
+      color: var(--text-muted);
+    }
+
+    .loading-state i, .empty-state i {
+      font-size: 2.5rem;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 768px) {
+      .tech-section-card {
+        padding: 24px 20px;
+      }
+
+      .tech-section-header {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .arch-diagram {
+        flex-direction: column;
+      }
+
+      .arch-arrow {
+        transform: rotate(90deg);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 背景粒子层 -->
+  <div class="bg-particles" aria-hidden="true"></div>
+
+  <!-- ====== 导航栏 ====== -->
+  <header class="glass-nav" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="logo">纸盒人</a>
+      <div class="nav-links">
+        <a href="index.html">首页</a>
+        <a href="index.html#tools">工具</a>
+        <a href="about.html">关于</a>
+        <a href="tech-overview.html" class="active">技术揭秘</a>
+        <a href="index.html#contact">联系</a>
+      </div>
+      <button class="nav-toggle" id="navToggle" aria-label="菜单">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- 移动端菜单 -->
+  <div class="mobile-menu-overlay" id="mobileOverlay">
+    <div class="mobile-menu-panel" id="mobilePanel">
+      <button class="mobile-menu-close" id="mobileClose" aria-label="关闭菜单">
+        <i class="fas fa-times"></i>
+      </button>
+      <nav class="mobile-menu-links">
+        <a href="index.html">首页</a>
+        <a href="index.html#tools">工具</a>
+        <a href="about.html">关于</a>
+        <a href="tech-overview.html" class="active">技术揭秘</a>
+        <a href="index.html#contact">联系</a>
+      </nav>
+    </div>
+  </div>
+
+  <!-- ====== 主内容 ====== -->
+  <main class="tech-page">
+
+    <!-- ===== Hero 头部 ===== -->
+    <section class="tech-hero fade-in-up">
+      <div class="hero-icon"><i class="fas fa-code-branch"></i></div>
+      <h1>技术揭秘</h1>
+      <p class="subtitle">这个网站是怎么做出来的？从页面设计到后端服务，一探究竟。</p>
+      <div class="tech-tags">
+        <span class="tag tag-primary"><i class="fab fa-html5"></i> HTML5</span>
+        <span class="tag tag-primary"><i class="fab fa-css3-alt"></i> CSS3</span>
+        <span class="tag tag-purple"><i class="fab fa-js"></i> JavaScript</span>
+        <span class="tag tag-primary"><i class="fab fa-vuejs"></i> Vue 3</span>
+        <span class="tag tag-primary"><i class="fas fa-database"></i> SQLite</span>
+        <span class="tag tag-purple"><i class="fas fa-server"></i> Express</span>
+        <span class="tag tag-accent"><i class="fas fa-bolt"></i> Vite</span>
+      </div>
+    </section>
+
+    <!-- ===== 内容区 ===== -->
+    <div class="tech-container" id="techSections">
+      <!-- 由 JS 动态渲染 -->
+      <div class="loading-state fade-in-up" id="loadingState">
+        <i class="fas fa-circle-notch fa-spin"></i>
+        <p>加载中...</p>
+      </div>
+    </div>
+
+    <!-- ===== 架构概览（静态） ===== -->
+    <div class="tech-container fade-in-up delay-200">
+      <div class="tech-section">
+        <div class="tech-section-card glass-card-strong">
+          <div class="tech-section-header">
+            <div class="ts-icon"><i class="fas fa-sitemap"></i></div>
+            <div>
+              <h2>整体架构</h2>
+              <div class="ts-badge">Architecture</div>
+            </div>
+          </div>
+          <div class="tech-content">
+            <p>本站采用<strong>前后端分离</strong>架构：前端纯静态页面部署于 <strong>BOX</strong> 目录，通过 <strong>RESTful API</strong> 与后端通信；后台管理系统基于 <strong>Vue 3</strong> 构建，构建产物由同一 Node.js 服务托管。</p>
+          </div>
+          <div class="arch-diagram">
+            <div class="arch-item"><i class="fas fa-globe"></i><span>前端页面</span></div>
+            <span class="arch-arrow"><i class="fas fa-arrow-right"></i></span>
+            <div class="arch-item"><i class="fas fa-cloud"></i><span>Public API</span></div>
+            <span class="arch-arrow"><i class="fas fa-arrow-right"></i></span>
+            <div class="arch-item"><i class="fas fa-database"></i><span>SQLite</span></div>
+            <span class="arch-arrow"><i class="fas fa-arrow-right"></i></span>
+            <div class="arch-item"><i class="fas fa-server"></i><span>Express</span></div>
+            <span class="arch-arrow"><i class="fas fa-arrow-right"></i></span>
+            <div class="arch-item"><i class="fas fa-shield-alt"></i><span>JWT Auth</span></div>
+            <span class="arch-arrow"><i class="fas fa-arrow-right"></i></span>
+            <div class="arch-item"><i class="fas fa-tachometer-alt"></i><span>管理后台</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ====== 页脚 ====== -->
+  <footer class="site-footer">
+    <p>&copy; <span id="cyear"></span> <span class="footer-heart">♦</span> 纸盒人. Built with <span class="footer-heart">❤</span> and ☕</p>
+  </footer>
+
+  <!-- ====== Scripts ====== -->
+  <script>
+    // 导航栏滚动效果
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 40) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    }, { passive: true });
+
+    // 移动端菜单
+    const navToggle = document.getElementById('navToggle');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    const mobilePanel = document.getElementById('mobilePanel');
+    const mobileClose = document.getElementById('mobileClose');
+
+    function openMobileMenu() {
+      mobileOverlay.classList.add('open');
+      mobilePanel.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMobileMenu() {
+      mobileOverlay.classList.remove('open');
+      mobilePanel.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    navToggle.addEventListener('click', openMobileMenu);
+    mobileClose.addEventListener('click', closeMobileMenu);
+    mobileOverlay.addEventListener('click', (e) => {
+      if (e.target === mobileOverlay) closeMobileMenu();
+    });
+
+    mobilePanel.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', closeMobileMenu);
+    });
+
+    // 滚动动画
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.fade-in-up, .fade-in').forEach(el => {
+      observer.observe(el);
+    });
+  </script>
+  <script src="theme.js"></script>
+  <script>
+// ═══════════════════════════════════════════════
+// 从 API 动态加载技术介绍章节
+// ═══════════════════════════════════════════════
+(function() {
+  'use strict';
+  var API = 'https://zhirbox-admin-node-production.up.railway.app/api/public/tech-overview';
+
+  function escHtml(s) {
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  // 图标映射
+  var iconMap = {
+    frontend: '<i class="fas fa-laptop-code"></i>',
+    admin: '<i class="fas fa-tachometer-alt"></i>',
+    backend: '<i class="fas fa-server"></i>',
+    default: '<i class="fas fa-cog"></i>'
+  };
+
+  fetch(API + '/tech-overview')
+    .then(function(r) { return r.json(); })
+    .then(function(arr) {
+      var container = document.getElementById('techSections');
+      var loading = document.getElementById('loadingState');
+      if (loading) loading.style.display = 'none';
+
+      if (!arr || !arr.length) {
+        container.innerHTML = '<div class="empty-state fade-in-up"><i class="fas fa-info-circle"></i><p>暂无内容，敬请期待</p></div>';
+        return;
+      }
+
+      var html = '';
+      arr.forEach(function(section, i) {
+        var iconHtml = iconMap[section.section_key] || iconMap.default;
+        var delay = 'delay-' + ((i % 4) * 100);
+        html += '<div class="tech-section fade-in-up ' + delay + '">'
+          + '<div class="tech-section-card glass-card-strong">'
+          + '<div class="tech-section-header">'
+          + '<div class="ts-icon">' + iconHtml + '</div>'
+          + '<div>'
+          + '<h2>' + escHtml(section.title) + '</h2>'
+          + '<div class="ts-badge">' + escHtml(section.section_key) + '</div>'
+          + '</div></div>'
+          + '<div class="tech-content">' + (section.content || '') + '</div>'
+          + '</div></div>';
+      });
+      container.innerHTML = html;
+
+      // 为新插入的元素注册观察器
+      container.querySelectorAll('.fade-in-up').forEach(function(el) {
+        observer.observe(el);
+      });
+    })
+    .catch(function(err) {
+      var container = document.getElementById('techSections');
+      var loading = document.getElementById('loadingState');
+      if (loading) loading.style.display = 'none';
+      container.innerHTML = '<div class="empty-state fade-in-up"><i class="fas fa-exclamation-triangle"></i><p>加载失败，请稍后再试</p></div>';
+    });
+})();
+  </script>
+</body>
+</html>
