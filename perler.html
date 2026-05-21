@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>拼豆图纸生成器 — 纸盒人</title>
+  <meta name="description" content="在线拼豆图纸生成器，上传图片一键转为马赛克拼豆图案，支持颜色量化匹配 Perler 24 色盘">
+  <link rel="icon" href="./博客.png" type="image/png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    /* ===== 拼豆页专属样式 ===== */
+    .perler-page {
+      padding-top: 96px;
+      padding-bottom: 80px;
+    }
+
+    .perler-container {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .perler-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .perler-header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .perler-header p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    /* ===== 控制面板 ===== */
+    .control-panel {
+      padding: 28px;
+      margin-bottom: 28px;
+      background: var(--bg-glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-glass);
+      border-radius: var(--radius-lg);
+    }
+
+    .control-group {
+      margin-bottom: 20px;
+    }
+
+    .control-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .control-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    /* 文件上传区域 */
+    .file-upload-area {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .file-upload-btn {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .file-upload-btn input[type="file"] {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .file-name {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      flex: 1;
+      min-width: 120px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* 滑块 */
+    .slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .slider-wrap input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      flex: 1;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--bg-glass-strong);
+      outline: none;
+      transition: background var(--transition-fast);
+    }
+
+    .slider-wrap input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--gradient-primary);
+      cursor: pointer;
+      border: 2px solid var(--bg-deep);
+      box-shadow: 0 0 12px rgba(0, 212, 255, 0.3);
+      transition: transform var(--transition-fast);
+    }
+
+    .slider-wrap input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    .slider-wrap input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--gradient-primary);
+      cursor: pointer;
+      border: 2px solid var(--bg-deep);
+      box-shadow: 0 0 12px rgba(0, 212, 255, 0.3);
+    }
+
+    .slider-value {
+      min-width: 36px;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    /* 开关 */
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 48px;
+      height: 26px;
+      cursor: pointer;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: var(--bg-glass-strong);
+      border: 1px solid var(--border-glass);
+      border-radius: 26px;
+      transition: all var(--transition-fast);
+    }
+
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      transition: all var(--transition-fast);
+    }
+
+    .toggle-switch input:checked + .toggle-track {
+      background: rgba(0, 212, 255, 0.15);
+      border-color: var(--primary);
+    }
+
+    .toggle-switch input:checked + .toggle-track::after {
+      background: var(--primary);
+      left: 25px;
+      box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+    }
+
+    .toggle-label {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .toggle-hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-left: 60px;
+      margin-top: 2px;
+    }
+
+    /* 操作行 */
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .action-row .btn {
+      flex: 1;
+      min-width: 120px;
+    }
+
+    /* ===== 预览区域 ===== */
+    .preview-area {
+      position: relative;
+      padding: 24px;
+      text-align: center;
+      min-height: 320px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-placeholder {
+      color: var(--text-muted);
+      padding: 60px 20px;
+    }
+
+    .preview-placeholder i {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      opacity: 0.4;
+    }
+
+    .preview-placeholder p {
+      font-size: 0.95rem;
+    }
+
+    #resultCanvas {
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--radius-sm);
+      display: none;
+    }
+
+    .preview-info {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 16px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .preview-info span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .preview-info i {
+      color: var(--primary);
+    }
+
+    /* ===== 保存区域 ===== */
+    .save-area {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .save-hint {
+      display: none;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 10px;
+      padding: 10px 16px;
+      background: var(--bg-glass);
+      border-radius: var(--radius-sm);
+    }
+
+    .save-hint i {
+      color: var(--accent);
+      margin-right: 6px;
+    }
+
+    /* ===== 色盘展示 ===== */
+    .palette-display {
+      display: none;
+      margin-top: 16px;
+      padding: 16px;
+      background: var(--bg-glass);
+      border-radius: var(--radius-md);
+    }
+
+    .palette-display.visible {
+      display: block;
+    }
+
+    .palette-title {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .palette-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .palette-swatch {
+      width: 22px;
+      height: 22px;
+      border-radius: 3px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* ===== 响应式 ===== */
+    @media (max-width: 640px) {
+      .control-panel {
+        padding: 20px 16px;
+      }
+
+      .file-upload-area {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .file-name {
+        min-width: unset;
+      }
+
+      .action-row {
+        flex-direction: column;
+      }
+
+      .action-row .btn {
+        min-width: unset;
+      }
+
+      .preview-area {
+        padding: 16px;
+        min-height: 240px;
+      }
+
+      .preview-placeholder {
+        padding: 40px 16px;
+      }
+
+      .preview-placeholder i {
+        font-size: 2.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 背景粒子层 -->
+  <div class="bg-particles" aria-hidden="true"></div>
+
+  <!-- ====== 导航栏 ====== -->
+  <header class="glass-nav" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="logo">纸盒人</a>
+      <div class="nav-links">
+        <a href="index.html">首页</a>
+        <a href="index.html#tools">工具</a>
+        <a href="about.html">关于</a>
+        <a href="tech-overview.html">技术揭秘</a>
+        <a href="index.html#contact">联系</a>
+      </div>
+      <button class="nav-toggle" id="navToggle" aria-label="菜单">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- 移动端菜单 -->
+  <div class="mobile-menu-overlay" id="mobileOverlay">
+    <div class="mobile-menu-panel" id="mobilePanel">
+      <button class="mobile-menu-close" id="mobileClose" aria-label="关闭菜单">
+        <i class="fas fa-times"></i>
+      </button>
+      <nav class="mobile-menu-links">
+        <a href="index.html">首页</a>
+        <a href="index.html#tools">工具</a>
+        <a href="about.html">关于</a>
+        <a href="tech-overview.html">技术揭秘</a>
+        <a href="perler.html" class="active">拼豆</a>
+        <a href="index.html#contact">联系</a>
+      </nav>
+    </div>
+  </div>
+
+  <!-- ====== 主内容 ====== -->
+  <main class="perler-page">
+    <div class="perler-container">
+
+      <!-- 头部 -->
+      <div class="perler-header fade-in-up">
+        <h1><span class="gradient-text">🧩 拼豆图纸生成器</span></h1>
+        <p>上传图片 → 调整参数 → 一键生成马赛克拼豆图纸</p>
+      </div>
+
+      <!-- 控制面板 -->
+      <div class="control-panel glass-card-strong fade-in-up delay-100">
+
+        <!-- 文件上传 -->
+        <div class="control-group">
+          <label class="control-label"><i class="fas fa-image"></i> 选择图片</label>
+          <div class="file-upload-area">
+            <span class="btn btn-primary btn-sm file-upload-btn">
+              <i class="fas fa-upload"></i> 上传图片
+              <input type="file" id="imageInput" accept="image/jpeg,image/png">
+            </span>
+            <span class="file-name" id="fileName">未选择文件</span>
+            <button class="btn btn-ghost btn-sm" id="resetBtn" style="display:none;">
+              <i class="fas fa-redo"></i> 重置
+            </button>
+          </div>
+        </div>
+
+        <!-- 马赛克块大小 -->
+        <div class="control-group">
+          <label class="control-label"><i class="fas fa-th"></i> 马赛克块大小</label>
+          <div class="slider-wrap">
+            <input type="range" id="blockSize" min="6" max="64" value="10" step="1">
+            <span class="slider-value" id="blockSizeDisplay">10</span>
+            <span style="font-size:0.78rem;color:var(--text-muted);">(值越小块数越多)</span>
+          </div>
+        </div>
+
+        <!-- 颜色量化开关 -->
+        <div class="control-group">
+          <div class="toggle-wrap">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quantizeToggle" checked>
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label"><i class="fas fa-palette"></i> 颜色量化匹配</span>
+          </div>
+          <div class="toggle-hint">将色块匹配到 Perler 24 色拼豆色盘，更接近真实成品效果</div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="action-row">
+          <button class="btn btn-primary" id="generateBtn">
+            <i class="fas fa-magic"></i> 生成并预览
+          </button>
+        </div>
+      </div>
+
+      <!-- 预览画布卡片 -->
+      <div class="glass-card-strong preview-area fade-in-up delay-200" id="previewCard">
+        <div class="preview-placeholder" id="placeholder">
+          <i class="fas fa-image"></i>
+          <p>上传图片并点击「生成并预览」</p>
+        </div>
+        <canvas id="resultCanvas"></canvas>
+        <div class="preview-info" id="previewInfo" style="display:none;">
+          <span><i class="fas fa-th"></i> 块大小: <strong id="infoBlockSize">-</strong></span>
+          <span><i class="fas fa-table"></i> 网格: <strong id="infoGrid">-</strong></span>
+          <span><i class="fas fa-palette"></i> 色数: <strong id="infoColors">-</strong></span>
+        </div>
+      </div>
+
+      <!-- 保存区域 -->
+      <div class="save-area fade-in-up delay-300">
+        <button class="btn btn-ghost-purple" id="saveBtn" style="display:none;">
+          <i class="fas fa-download"></i> 保存为图片
+        </button>
+        <div class="save-hint" id="saveHint">
+          <i class="fas fa-hand-pointer"></i> 长按图片可保存到相册
+        </div>
+      </div>
+
+      <!-- 色盘展示 -->
+      <div class="palette-display fade-in-up delay-300" id="paletteDisplay">
+        <div class="palette-title"><i class="fas fa-palette"></i> Perler 24 色盘参考</div>
+        <div class="palette-grid" id="paletteGrid"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ====== 页脚 ====== -->
+  <footer class="site-footer">
+    <p>&copy; <span id="cyear"></span> <span class="footer-heart">♦</span> 纸盒人. Built with <span class="footer-heart">❤</span> and ☕</p>
+  </footer>
+
+  <script>
+    // =============================================
+    // 导航 / 移动端菜单 / 年份
+    // =============================================
+    (function() {
+      var navbar = document.getElementById('navbar');
+      window.addEventListener('scroll', function() {
+        if (window.scrollY > 40) navbar.classList.add('scrolled');
+        else navbar.classList.remove('scrolled');
+      }, { passive: true });
+
+      var navToggle = document.getElementById('navToggle');
+      var mobileOverlay = document.getElementById('mobileOverlay');
+      var mobilePanel = document.getElementById('mobilePanel');
+      var mobileClose = document.getElementById('mobileClose');
+
+      function openMenu() {
+        mobileOverlay.classList.add('open');
+        mobilePanel.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeMenu() {
+        mobileOverlay.classList.remove('open');
+        mobilePanel.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+      navToggle.addEventListener('click', openMenu);
+      mobileClose.addEventListener('click', closeMenu);
+      mobileOverlay.addEventListener('click', function(e) {
+        if (e.target === mobileOverlay) closeMenu();
+      });
+      mobilePanel.querySelectorAll('a').forEach(function(a) {
+        a.addEventListener('click', closeMenu);
+      });
+
+      document.getElementById('cyear').textContent = new Date().getFullYear();
+
+      // 滚动动画
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+      document.querySelectorAll('.fade-in-up').forEach(function(el) { observer.observe(el); });
+
+      // 主题切换
+      var themeBtn = document.createElement('button');
+      themeBtn.id = 'themeToggle';
+      themeBtn.className = 'btn btn-ghost btn-sm';
+      themeBtn.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:50;';
+      themeBtn.innerHTML = '<i class="fas fa-moon"></i>';
+      themeBtn.setAttribute('title', '切换主题');
+      document.body.appendChild(themeBtn);
+      themeBtn.addEventListener('click', function() {
+        var html = document.documentElement;
+        var isLight = html.getAttribute('data-theme') === 'light';
+        html.setAttribute('data-theme', isLight ? '' : 'light');
+        themeBtn.innerHTML = isLight ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+      });
+    })();
+
+    // =============================================
+    // 拼豆核心功能
+    // =============================================
+    (function() {
+      'use strict';
+
+      // ---- 状态 ----
+      var uploadedImage = null;        // 原始 Image 对象
+      var mosaicCanvas = null;        // 生成的拼豆 canvas（用于保存）
+      var currentGridCols = 0;
+      var currentGridRows = 0;
+      var usedColors = [];
+
+      // ---- DOM 引用 ----
+      var fileInput = document.getElementById('imageInput');
+      var fileName = document.getElementById('fileName');
+      var resetBtn = document.getElementById('resetBtn');
+      var blockSizeSlider = document.getElementById('blockSize');
+      var blockSizeDisplay = document.getElementById('blockSizeDisplay');
+      var quantizeToggle = document.getElementById('quantizeToggle');
+      var generateBtn = document.getElementById('generateBtn');
+      var saveBtn = document.getElementById('saveBtn');
+      var saveHint = document.getElementById('saveHint');
+      var resultCanvas = document.getElementById('resultCanvas');
+      var placeholder = document.getElementById('placeholder');
+      var previewInfo = document.getElementById('previewInfo');
+      var infoBlockSize = document.getElementById('infoBlockSize');
+      var infoGrid = document.getElementById('infoGrid');
+      var infoColors = document.getElementById('infoColors');
+      var paletteDisplay = document.getElementById('paletteDisplay');
+      var paletteGrid = document.getElementById('paletteGrid');
+
+      // ---- Perler 24 色盘 (RGB) ----
+      var PERLER_COLORS = [
+        { name: 'Black',      r: 0,   g: 0,   b: 0    },
+        { name: 'White',      r: 255, g: 255, b: 255  },
+        { name: 'Dark Grey',  r: 64,  g: 64,  b: 64   },
+        { name: 'Grey',       r: 128, g: 128, b: 128  },
+        { name: 'Light Grey', r: 195, g: 195, b: 195  },
+        { name: 'Red',        r: 204, g: 0,   b: 0    },
+        { name: 'Cranberry',  r: 153, g: 0,   b: 0    },
+        { name: 'Orange',     r: 255, g: 102, b: 0    },
+        { name: 'Yellow',     r: 255, g: 204, b: 0    },
+        { name: 'Lime',       r: 102, g: 204, b: 0    },
+        { name: 'Green',      r: 0,   g: 153, b: 0    },
+        { name: 'Dark Green', r: 0,   g: 102, b: 0    },
+        { name: 'Teal',       r: 0,   g: 153, b: 153  },
+        { name: 'Light Blue', r: 102, g: 178, b: 255  },
+        { name: 'Blue',       r: 0,   g: 0,   b: 204  },
+        { name: 'Dark Blue',  r: 0,   g: 0,   b: 102  },
+        { name: 'Purple',     r: 102, g: 0,   b: 153  },
+        { name: 'Lavender',   r: 180, g: 150, b: 255  },
+        { name: 'Pink',       r: 255, g: 150, b: 200  },
+        { name: 'Hot Pink',   r: 255, g: 0,   b: 128  },
+        { name: 'Peach',      r: 255, g: 218, b: 185  },
+        { name: 'Tan',        r: 210, g: 180, b: 140  },
+        { name: 'Brown',      r: 153, g: 76,  b: 0    },
+        { name: 'Dark Brown', r: 76,  g: 38,  b: 0    }
+      ];
+
+      // ---- 初始化色盘展示 ----
+      (function initPalette() {
+        PERLER_COLORS.forEach(function(c) {
+          var swatch = document.createElement('div');
+          swatch.className = 'palette-swatch';
+          swatch.style.background = 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
+          swatch.title = c.name + ' (rgb(' + c.r + ',' + c.g + ',' + c.b + '))';
+          paletteGrid.appendChild(swatch);
+        });
+        paletteDisplay.classList.add('visible');
+      })();
+
+      // ---- 工具函数 ----
+      function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+      function scaleImage(img, maxSize) {
+        var w = img.naturalWidth || img.width;
+        var h = img.naturalHeight || img.height;
+        if (w <= maxSize && h <= maxSize) return { width: w, height: h };
+        var ratio = Math.min(maxSize / w, maxSize / h);
+        return { width: Math.round(w * ratio), height: Math.round(h * ratio) };
+      }
+
+      function rgbDist(r1, g1, b1, r2, g2, b2) {
+        var dr = r1 - r2, dg = g1 - g2, db = b1 - b2;
+        // 加权距离（人眼对绿色更敏感）
+        return 0.299 * dr * dr + 0.587 * dg * dg + 0.114 * db * db;
+      }
+
+      function nearestPerler(r, g, b) {
+        var minDist = Infinity;
+        var best = PERLER_COLORS[0];
+        for (var i = 0; i < PERLER_COLORS.length; i++) {
+          var c = PERLER_COLORS[i];
+          var d = rgbDist(r, g, b, c.r, c.g, c.b);
+          if (d < minDist) { minDist = d; best = c; }
+        }
+        return best;
+      }
+
+      // ---- 文件上传 ----
+      fileInput.addEventListener('change', function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        fileName.textContent = file.name;
+        resetBtn.style.display = '';
+
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+          var img = new Image();
+          img.onload = function() {
+            uploadedImage = img;
+            // 预览原图（按比例缩放，最长边 500px）
+            var scaled = scaleImage(img, 500);
+            resultCanvas.width = scaled.width;
+            resultCanvas.height = scaled.height;
+            var ctx = resultCanvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, scaled.width, scaled.height);
+            resultCanvas.style.display = 'block';
+            placeholder.style.display = 'none';
+            previewInfo.style.display = 'none';
+            // 重置前一次的结果
+            mosaicCanvas = null;
+            saveBtn.style.display = 'none';
+            saveHint.style.display = 'none';
+          };
+          img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+
+      // ---- 重置 ----
+      resetBtn.addEventListener('click', function() {
+        fileInput.value = '';
+        uploadedImage = null;
+        mosaicCanvas = null;
+        fileName.textContent = '未选择文件';
+        resetBtn.style.display = 'none';
+        placeholder.style.display = 'block';
+        resultCanvas.style.display = 'none';
+        previewInfo.style.display = 'none';
+        saveBtn.style.display = 'none';
+        saveHint.style.display = 'none';
+      });
+
+      // ---- 滑块实时显示 ----
+      blockSizeSlider.addEventListener('input', function() {
+        blockSizeDisplay.textContent = this.value;
+      });
+
+      // ---- 生成拼豆 ----
+      generateBtn.addEventListener('click', function() {
+        if (!uploadedImage) {
+          alert('请先上传一张图片');
+          return;
+        }
+
+        var blockSize = parseInt(blockSizeSlider.value, 10);
+        var quantize = quantizeToggle.checked;
+
+        // 1. 缩放原图到最长边 ≤ MAX_SIZE
+        var MAX_SIZE = 500;
+        var scaled = scaleImage(uploadedImage, MAX_SIZE);
+        var sw = scaled.width;
+        var sh = scaled.height;
+
+        // 2. 绘制原图到离屏 canvas
+        var srcCanvas = document.createElement('canvas');
+        srcCanvas.width = sw;
+        srcCanvas.height = sh;
+        var srcCtx = srcCanvas.getContext('2d');
+        srcCtx.drawImage(uploadedImage, 0, 0, sw, sh);
+
+        // 3. 读取像素数据
+        var imageData = srcCtx.getImageData(0, 0, sw, sh);
+        var data = imageData.data;
+
+        // 4. 计算网格
+        var cols = Math.ceil(sw / blockSize);
+        var rows = Math.ceil(sh / blockSize);
+        currentGridCols = cols;
+        currentGridRows = rows;
+
+        // 5. 创建马赛克低分辨率 canvas
+        var mosaicRaw = document.createElement('canvas');
+        mosaicRaw.width = cols;
+        mosaicRaw.height = rows;
+        var rawCtx = mosaicRaw.getContext('2d');
+
+        var colorSet = {};
+
+        for (var r = 0; r < rows; r++) {
+          for (var c = 0; c < cols; c++) {
+            var sx = c * blockSize;
+            var sy = r * blockSize;
+            var ex = Math.min(sx + blockSize, sw);
+            var ey = Math.min(sy + blockSize, sh);
+
+            var sumR = 0, sumG = 0, sumB = 0, count = 0;
+            for (var py = sy; py < ey; py++) {
+              for (var px = sx; px < ex; px++) {
+                var idx = (py * sw + px) * 4;
+                sumR += data[idx];
+                sumG += data[idx + 1];
+                sumB += data[idx + 2];
+                count++;
+              }
+            }
+
+            var avgR = Math.round(sumR / count);
+            var avgG = Math.round(sumG / count);
+            var avgB = Math.round(sumB / count);
+
+            if (quantize) {
+              var near = nearestPerler(avgR, avgG, avgB);
+              avgR = near.r; avgG = near.g; avgB = near.b;
+              var key = avgR + ',' + avgG + ',' + avgB;
+              colorSet[key] = (colorSet[key] || 0) + 1;
+            }
+
+            rawCtx.fillStyle = 'rgb(' + avgR + ',' + avgG + ',' + avgB + ')';
+            rawCtx.fillRect(c, r, 1, 1);
+          }
+        }
+
+        usedColors = Object.keys(colorSet);
+        infoColors.textContent = quantize ? (usedColors.length + ' 色') : '-';
+
+        // 6. 放大到显示尺寸（每块 ≈ 16px，保证整体不超过 600px）
+        var MAX_DISPLAY = 600;
+        var displayBlockSize = Math.min(
+          Math.floor(MAX_DISPLAY / cols),
+          Math.floor(MAX_DISPLAY / rows)
+        );
+        displayBlockSize = Math.max(displayBlockSize, 5); // 最小 5px/块，显示更多块
+        var dW = cols * displayBlockSize;
+        var dH = rows * displayBlockSize;
+
+        var displayCanvas = document.createElement('canvas');
+        displayCanvas.width = dW;
+        displayCanvas.height = dH;
+        var ctx = displayCanvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(mosaicRaw, 0, 0, dW, dH);
+
+        // 可选：画网格边框（1px 深色线）
+        ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+        ctx.lineWidth = 0.5;
+        for (var gi = 0; gi <= cols; gi++) {
+          var x = gi * displayBlockSize;
+          ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, dH); ctx.stroke();
+        }
+        for (var gj = 0; gj <= rows; gj++) {
+          var y = gj * displayBlockSize;
+          ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(dW, y); ctx.stroke();
+        }
+
+        mosaicCanvas = displayCanvas;
+
+        // 7. 显示到页面
+        resultCanvas.width = dW;
+        resultCanvas.height = dH;
+        var resultCtx = resultCanvas.getContext('2d');
+        resultCtx.drawImage(displayCanvas, 0, 0);
+
+        resultCanvas.style.display = 'block';
+        placeholder.style.display = 'none';
+
+        // 信息
+        infoBlockSize.textContent = blockSize + 'px';
+        infoGrid.textContent = cols + '×' + rows;
+        previewInfo.style.display = 'flex';
+
+        // 保存按钮
+        saveBtn.style.display = 'inline-flex';
+        saveHint.style.display = 'none';
+
+        // 滚动到画布
+        document.getElementById('previewCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+
+      // ---- 保存为图片 ----
+      saveBtn.addEventListener('click', function() {
+        if (!mosaicCanvas) {
+          alert('请先生成拼豆图纸');
+          return;
+        }
+
+        try {
+          mosaicCanvas.toBlob(function(blob) {
+            if (!blob) {
+              fallbackSave();
+              return;
+            }
+            var url = URL.createObjectURL(blob);
+
+            // 方案 A：下载属性（安卓 / 桌面）
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'perler-pattern.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(function() { URL.revokeObjectURL(url); }, 5000);
+
+            // 显示长按提示（iOS Safari 不支持 download 属性）
+            saveHint.style.display = 'block';
+          }, 'image/png');
+        } catch(e) {
+          fallbackSave();
+        }
+      });
+
+      function fallbackSave() {
+        // 降级方案：dataURI 直接打开
+        var dataUrl = mosaicCanvas.toDataURL('image/png');
+        var w = window.open(dataUrl);
+        if (!w) {
+          // 如果弹窗被拦截，直接显示提示
+          saveHint.innerHTML = '<i class="fas fa-hand-pointer"></i> 长按下方图片选择「保存图片」';
+          saveHint.style.display = 'block';
+        }
+      }
+    })();
+  </script>
+  <script src="theme.js"></script>
+</body>
+</html>

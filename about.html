@@ -1008,14 +1008,17 @@
     // 观察技能条 fill 元素（它们的父级 .skill-item 可见时触发）
     document.querySelectorAll('.skill-bar .fill').forEach(el => observer.observe(el));
 
-    // 导出 PDF — 浏览器原生打印，用户选择「另存为 PDF」
+    // 导出简历 PDF — 直接下载预置文件
     function exportPDF() {
-      // 确保所有滚动动画元素在打印前可见
-      document.querySelectorAll('.fade-in-up').forEach(el => el.classList.add('visible'));
-
-      // 微延迟等待样式生效
-      setTimeout(() => { window.print(); }, 200);
+      var a = document.createElement('a');
+      a.href = './王豪杰-前端开发工程师.pdf';
+      a.download = '王豪杰-前端开发工程师.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     }
+
+
   </script>
   <script src="theme.js"></script>
   <script>
